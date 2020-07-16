@@ -2,10 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 	"net/http"
-	"strconv"
+	"fmt"
+
 	//"time"
 )
 /*
@@ -21,6 +22,23 @@ import (
 
  localhost:4000/employees/search/?name=Joe
  */
+//returning data from sqlite database with a get request to an  endpoint where some of the values have a null value
+
+type Employee struct {
+	ID int
+	firstName string
+	lastName string
+	dateOfBirth string
+	addressLineOne string
+	addressLineTwo sql.NullString
+	city string
+	postcode string
+	startDate string
+	nextOfKin string
+	position string
+	endDate sql.NullString
+	recordCreatedDate string
+}
 
 
 func main() {
@@ -33,13 +51,34 @@ func main() {
 }
 
 func employeeHandler(w http.ResponseWriter, r *http.Request) {
-	//	SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, city, postcode, startDate, nextOfKin, position, recordCreatedDate FROM employees
 	switch method := r.Method; method {
 	case "GET":
-		returnAllEmployees()
+		database, err := sql.Open("sqlite3", "employee-database.db")
+		if err != nil {
+			log.Fatal(err)
+		}
+		rows, err := database.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer rows.Close()
+
+		employees := make([]*Employee, 0)
+		for rows.Next() {
+			employee := new(Employee)
+			err := rows.Scan(&employee.ID, &employee.firstName, &employee.lastName, &employee.dateOfBirth, &employee.addressLineOne, &employee.addressLineTwo, &employee.city, &employee.postcode, &employee.startDate, &employee.nextOfKin, &employee.position, &employee.endDate, &employee.recordCreatedDate)
+			if err != nil {
+				log.Fatal(err)
+			}
+			employees = append(employees, employee)
+		}
+		if err = rows.Err(); err != nil {
+			log.Fatal(err)
+		}
+		for _, employee := range employees {
+			fmt.Fprintf(w, "%b, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.firstName, employee.lastName, employee.dateOfBirth, employee.addressLineOne, employee.addressLineTwo, employee.city, employee.postcode, employee.startDate, employee.nextOfKin, employee.position, employee.endDate, employee.recordCreatedDate)
+		}
 			fmt.Fprintln(w, "Endpoint hit: Return all employees records")
-
-
 	case "POST":
 		fmt.Fprintln(w, "Endpoint hit: Create new employee record")
 	default:
@@ -91,41 +130,43 @@ func employeeByDateHandler(w http.ResponseWriter, r*http.Request) {
 	}
 }
 
-func returnAllEmployees(){
-	database, _ := sql.Open("sqlite3", "employee-database.db")
-	rows, _ := database.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, city, postcode, startDate, nextOfKin, position, recordCreatedDate FROM employees")
-	var ID int
-	var firstName string
-	var lastName string
-	var dateOfBirth string
-	var addressLineOne string
-	//var addressLineTwo string
-	var city string
-	var postcode string
-	var startDate string
-	var nextOfKin string
-	var position string
-	var recordCreatedDate string
-	for rows.Next(){
-		rows.Scan(&ID, &firstName, &lastName, &dateOfBirth, &addressLineOne,  &city, &postcode, &startDate, &nextOfKin, &position, &recordCreatedDate)
-		fmt.Println(strconv.Itoa(ID) + ": " + firstName + " " + lastName + " " + addressLineOne +  " " + city + " " + postcode + " " + startDate + " " + nextOfKin + " " + position + " " + recordCreatedDate)
+
+
+/*var returnAllEmployees = func (){
+	database, err := sql.Open("sqlite3", "employee-database.db")
+	if err != nil {
+		log.Fatal(err)
 	}
-	rows.Close()
-}
+	rows, err := database.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	employees := make([]*Employee, 0)
+	for rows.Next() {
+		employee := new(Employee)
+		err := rows.Scan(&employee.ID, &employee.firstName, &employee.lastName, &employee.dateOfBirth, &employee.addressLineOne, &employee.addressLineTwo, &employee.city, &employee.postcode, &employee.startDate, &employee.nextOfKin, &employee.position, &employee.endDate, &employee.recordCreatedDate)
+		if err != nil {
+			log.Fatal(err)
+		}
+		employees = append(employees, employee)
+	}
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	for _, employee := range employees {
+		//fmt.Fprintf(w, "%b, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, &employee.firstName, &employee.lastName, &employee.dateOfBirth, &employee.addressLineOne, &employee.city, &employee.postcode, &employee.startDate, &employee.nextOfKin, &employee.position, &employee.recordCreatedDate)
+		fmt.Println(employee.ID,":" + " " + employee.firstName, employee.lastName, employee.dateOfBirth, employee.addressLineOne, employee.addressLineTwo, employee.city, employee.postcode, employee.startDate, employee.nextOfKin, employee.position, employee.endDate, employee.recordCreatedDate)
+	}
+} */
 
 
 /* TO DO
-Connect employee database to go project
-Create table if does not exist
 Test by a) returning all employees (employeeHandler - get request) b) creating a new employee (employeeHandler - post request)
 */
 
-/* TO DO Oge
 
-Create endpoints, add in date created field, figure out SQL queries, write notes on decision to use type Interger for date.
-Split search endpoint - search by text and search by date.
-
-*/
 
 //CREATE TABLE "employees" ( "ID" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, "firstName" TEXT NOT NULL, "lastName" TEXT NOT NULL, "dateOfBirth" TEXT NOT NULL, "addressLineOne" TEXT NOT NULL, "addressLineTwo" TEXT, "city" TEXT NOT NULL, "postcode" TEXT NOT NULL, "startDate" TEXT NOT NULL, "nextOfKin" TEXT NOT NULL, "position" TEXT NOT NULL, "endDate" INTEGER, "recordCreatedDate" TEXT DEFAULT CURRENT_TIMESTAMP)
 
