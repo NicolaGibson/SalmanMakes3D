@@ -202,7 +202,7 @@ func employeeByTextSearchHandler(w http.ResponseWriter, r*http.Request){
 			fmt.Fprint(w, err)
 			return
 		}
-		row := database.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE name LIKE '$1%'", firstName)
+		row := database.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName =$1", firstName)
 		employee := new(Employee)
 		//scan input text, reads from there and stores space seperated values in successive arguements
 		err = row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
@@ -219,8 +219,7 @@ func employeeByTextSearchHandler(w http.ResponseWriter, r*http.Request){
 		fmt.Fprintln(w, "Endpoint hit: Return an employee by ID")
 
 
-
-		if r.URL.Query().Get("name") != ""  {
+		if r.URL.Query().Get("firstName") != ""  {
 			fmt.Fprintln(w, "Endpoint hit: Search for employees by name, position or date")
 		} else {
 			fmt.Fprintln(w, "Endpoint hit: Please enter name, position, start or end date to search for employees")
