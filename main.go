@@ -22,6 +22,7 @@ import (
  */
 
 //var db *sqlite3.db
+var ID = ""
 
 type Employee struct {
 	ID int `json:"id"`
@@ -139,24 +140,18 @@ func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 						ps = path [i +1:]
 					}
 				}
+				ID = ps
 				fmt.Println(ps)
 				return
 			}
-			getFirstParam(r.URL.Path)
+
 
 			database, err := sql.Open("sqlite3", "employee.db")
 			if err != nil {
 				log.Fatal(err)
 			}
-			/*title := r.URL.Path[len("/view/"):]
-			p, _ := loadPage(title)
-			t, _ := template.ParseFiles("view.html")
-			t.Execute(w, p)
-	} */
-
-
-
-			ID := r.FormValue("ID")
+			getFirstParam(r.URL.Path)
+			//ID := r.FormValue("ID")
 			if ID == ""{
 				http.Error(w, http.StatusText(400), 400)
 				fmt.Fprint(w, err)
