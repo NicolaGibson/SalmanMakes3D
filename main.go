@@ -25,44 +25,51 @@ import (
 var ID = ""
 
 type Employee struct {
-	ID int `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName string `json:"last_name"`
-	DateOfBirth string `json:"date_of_birth"`
-	AddressLineOne string `json:"address_line_one"`
-	AddressLineTwo sql.NullString `json:"address_line_two"`
-	City string `json:"city"`
-	Postcode string `json:"postcode"`
-	StartDate string `json:"start_date"`
-	NextOfKin string `json:"next_of_kin"`
-	Position string `json:"position"`
-	EndDate sql.NullString `json:"end_date"`
-	RecordCreatedDate string `json:"record_created_date"`
+	ID                int            `json:"id"`
+	FirstName         string         `json:"first_name"`
+	LastName          string         `json:"last_name"`
+	DateOfBirth       string         `json:"date_of_birth"`
+	AddressLineOne    string         `json:"address_line_one"`
+	AddressLineTwo    sql.NullString `json:"address_line_two"`
+	City              string         `json:"city"`
+	Postcode          string         `json:"postcode"`
+	StartDate         string         `json:"start_date"`
+	NextOfKin         string         `json:"next_of_kin"`
+	Position          string         `json:"position"`
+	EndDate           sql.NullString `json:"end_date"`
+	RecordCreatedDate string         `json:"record_created_date"`
+	employeeStatus    string
 }
+
+var db *sql.DB
+
+func init(){
+	var err error
+	db, err = sql.Open("sqlite3", "employee.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+}
+
 
 func main() {
 	http.HandleFunc("/employees", employeeHandler)
-
-	/*var url = "https://localhost/4000/employees/
-	u, _ := url.Parse(url)
-	ps := path.Base(u.Path)
-	fmt.Println(u.RequestURI())*/
-
 	http.HandleFunc("/employees/", employeeByIDHandler)
-	http.HandleFunc("/employees/search", employeeByTextSearchHandler)
+	http.HandleFunc("/employees/search", employeeSearchHandler)
 	http.ListenAndServe(":4000", nil)
+
+
 }
 
 //code for next page
 func employeeHandler(w http.ResponseWriter, r *http.Request) {
-
 	switch method := r.Method; method {
 	case "GET":
-	database, err := sql.Open("sqlite3", "employee.db")
-		if err != nil {
-			log.Fatal(err)
-		}
-		rows, err := database.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees ORDER BY lastName ASC LIMIT 0, 50")
+		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees ORDER BY lastName ASC LIMIT 0, 50")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -86,11 +93,6 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprintln(w, "Endpoint hit: Return all employees records")
 	case "POST":
-		database, err := sql.Open("sqlite3", "employee.db")
-		if err != nil {
-			log.Fatal(err)
-		}
-		//have a look at insert query structure for error - google how insert query should look
 		firstName := r.FormValue("firstName")
 		lastName := r.FormValue("lastName")
 		dateOfBirth := r.FormValue("dateOfBirth")
@@ -101,12 +103,13 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 		startDate := r.FormValue("startDate")
 		nextOfKin := r.FormValue("nextOfKin")
 		position := r.FormValue("position")
+		employeeStatus := r.FormValue("employeeStatus")
 
-		if firstName == "" ||lastName == "" ||addressLineOne == "" ||city == ""||postcode == "" ||startDate == "" ||nextOfKin == "" ||position == "" {
+		if firstName == "" ||lastName == "" ||addressLineOne == "" ||city == ""||postcode == "" ||startDate == "" ||nextOfKin == "" ||position == "" ||employeeStatus == "" {
 			http.Error(w, http.StatusText(400), 400)
 			return
 		}
-		result, err := database.Exec("INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)", firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position)
+		result, err := db.Exec("INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, employeeStatus) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, employeeStatus)
 		if err != nil{
 			http.Error(w, http.StatusText(500), 500)
 			return
@@ -117,7 +120,7 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Fprintf(w, "Employee %s created successfully (%d row affected)\n", firstName + "" + lastName, rowsAffected)
+		fmt.Fprintf(w, "Employee %s created successfully (%d row affected)\n", firstName + " " + lastName, rowsAffected)
 
 	default:
 		fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET or POST requests")
@@ -127,41 +130,32 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 //resource is employee, ID is primary key
 
 
+func getIDParam(path string) (ps string){
+	//ignore first / when hitting second / return everything after as a parameter
+	for i := 1; i<len(path); i++ {
+		if path[i] == '/'{
+			ps = path [i +1:]
+		}
+	}
+	ID = ps
+	fmt.Println(ps)
+	return
+}
+
+
 func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
-	// http://localhost:4000/employees/2
-	// http://localhost:4000/employees?ID=2
 	switch method := r.Method; method {
 		case "GET":
+			getIDParam(r.URL.Path)
 
-			getFirstParam := func(path string) (ps string){
-				//ignore first / when hitting second / return everything after as a parameter
-				for i := 1; i<len(path); i++ {
-					if path[i] == '/'{
-						ps = path [i +1:]
-					}
-				}
-				ID = ps
-				fmt.Println(ps)
-				return
-			}
-
-
-			database, err := sql.Open("sqlite3", "employee.db")
-			if err != nil {
-				log.Fatal(err)
-			}
-			getFirstParam(r.URL.Path)
-			//ID := r.FormValue("ID")
 			if ID == ""{
 				http.Error(w, http.StatusText(400), 400)
-				fmt.Fprint(w, err)
 				return
 			}
-			row := database.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE ID =$1", ID)
+			row := db.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus FROM employees WHERE ID =$1", ID)
 			employee := new(Employee)
 			//scan input text, reads from there and stores space seperated values in successive arguements
-			err = row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
-
+			err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
 			if err == sql.ErrNoRows{
 				http.NotFound(w, r)
 				return
@@ -170,62 +164,82 @@ func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, http.StatusText(500), 500)
 				return
 			}
-			fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate)
-			fmt.Fprintln(w, "Endpoint hit: Return an employee by ID")
+			fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate, employee.employeeStatus)
+			fmt.Fprint(w, "Endpoint hit: Return an employee by ID")
 
 		case "PATCH":
+
+			//UPDATE employees SET position = "Design Manager" WHERE ID = 2
 			fmt.Fprintln(w, "Endpoint hit: Update employee record by ID")
 		case "DELETE":
+			getIDParam(r.URL.Path)
+			if ID == ""{
+				http.Error(w, http.StatusText(400), 400)
+				return
+			}
+			row := db.QueryRow("UPDATE employees SET employeeStatus ='Active' WHERE ID =$1", ID)
+			employee := new(Employee)
+			//scan input text, reads from there and stores space seperated values in successive arguements
+			result,err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
+			if err != nil{
+				http.Error(w, http.StatusText(500), 500)
+				return
+			}
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				http.Error(w, http.StatusText(500),500)
+				return
+			}
+
+			fmt.Fprintf(w, "Employee %s created successfully (%d row affected)\n", firstName + " " + lastName, rowsAffected)
+
+
 			fmt.Fprintln(w, "Endpoint hit: Delete employee record by ID")
 		default:
 			fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET, PATCH and DELETE requests by ID")
 		}
 	}
 
-func employeeByTextSearchHandler(w http.ResponseWriter, r*http.Request){
+
+func employeeSearchHandler(w http.ResponseWriter, r*http.Request){
 	/* To Do: return employee record by name using current implementation err no such column name. Rewrite implementation using map for search by lastName, position, startDate, endDate, use map to pull out
 	different values. change url path, needs to be part of employee. Search on the employees endpoint
-	SELECT* FROM employees WHERE firstName like '%AAA%' OR lastName like '%AAA%' OR position like '%AAA% OR startDate like '%1111%' OR endDate like '%1111%' OR recordCreatedDate like '%1111%'
+	SELECT* FROM employees WHERE firstName like 'A%' OR lastName like '%AAA%' OR position like '%AAA% OR startDate like '%1111%' OR endDate like '%1111%' OR recordCreatedDate like '%1111%'
 	firstName := r.FormValue("firstName")  - OR firstName like '$1%'"
 	*/
-
 
 	switch method := r.Method; method {
 	case "GET":
 		database, err := sql.Open("sqlite3", "employee.db")
 		if err != nil {
+			panic(err)
+		}
+		employees := make([]*Employee,0)
+		//firstName := r.FormValue("firstName")
+		rows, err := database.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE @firstName")
+		if err != nil{
 			log.Fatal(err)
 		}
-		firstName := r.FormValue("firstName")
-		if firstName == ""{
-			http.Error(w, http.StatusText(400), 400)
-			fmt.Fprint(w, err)
-			return
-		}
-		row := database.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName =$1", firstName)
-		employee := new(Employee)
-		//scan input text, reads from there and stores space seperated values in successive arguements
-		err = row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
+		defer rows.Close()
 
-		if err == sql.ErrNoRows{
-			http.NotFound(w, r)
-			return
-		} else if err != nil{
-			fmt.Fprint(w, err)
-			http.Error(w, http.StatusText(500), 500)
-			return
-		}
-		fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate)
-		fmt.Fprintln(w, "Endpoint hit: Return an employee by ID")
-
-
-		if r.URL.Query().Get("firstName") != ""  {
+		for rows.Next() {
+			employee := new(Employee)
+			//scan input text, reads from there and stores space seperated values in successive arguements
+			if err = rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate); err != nil{
+			panic(err)
+				}
+				employees = append(employees, employee)
+				fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate)
+			}
+			/*if r.URL.Query().Get("firstName") != "" {
 			fmt.Fprintln(w, "Endpoint hit: Search for employees by name, position or date")
-		} else {
-			fmt.Fprintln(w, "Endpoint hit: Please enter name, position, start or end date to search for employees")
-		}
+			}*/
+			if err := rows.Err(); err != nil{
+				panic(err)
+			}
+
 	default:
-	fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET requests")
+		fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET requests")
 
 	}
 }
