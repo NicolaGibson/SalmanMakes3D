@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="be144e0e-ba98-4898-82d1-bdbe14b216cf" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/employee.db" beforeDir="false" afterPath="$PROJECT_DIR$/employee.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/employee.db-journal" beforeDir="false" afterPath="$PROJECT_DIR$/employee.db-journal" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -35,13 +36,14 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="393">
-              <caret line="192" column="27" lean-forward="true" selection-start-line="192" selection-start-column="27" selection-end-line="192" selection-end-column="27" />
+            <state relative-caret-position="314">
+              <caret line="179" column="8" selection-start-line="179" selection-start-column="8" selection-end-line="179" selection-end-column="8" />
               <folding>
                 <element signature="e#14#149#0" expanded="true" />
-                <element signature="n#!!block;n#getIDParam#0" />
-                <element signature="n#!!block;n#employeeSearchHandler#0" />
-                <element signature="e#7280#9036#0" />
+                <element signature="e#1464#2803#0" />
+                <element signature="e#2779#4433#0" />
+                <element signature="e#4405#4497#0" />
+                <element signature="e#6259#6509#0" />
                 <element signature="n#!!block;n#createTable#0" />
               </folding>
             </state>
@@ -118,7 +120,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="177" />
+    <option name="x" value="494" />
     <option name="y" value="23" />
     <option name="width" value="707" />
     <option name="height" value="825" />
@@ -130,17 +132,7 @@
     </navigator>
     <panes>
       <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="salmanMakes" type="b2602c69:ProjectViewProjectNode" />
-              <item name="salmanMakes" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -182,10 +174,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="177" y="23" width="707" height="825" extended-state="0" />
+    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" visible="true" weight="0.05263158" />
+      <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" visible="true" weight="0.09012876" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -198,12 +190,12 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" weight="0.3287858" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32891566" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.27830833" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.24578314" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Database" order="3" visible="true" weight="0.04511278" />
+      <window_info anchor="right" id="Database" order="3" visible="true" weight="0.021459227" />
     </layout>
     <layout-to-restore>
       <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" type="FLOATING" visible="true" weight="0.20386267" />
@@ -232,6 +224,18 @@
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/main.go</url>
+          <line>198</line>
+          <properties />
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/1e45598b-213b-4a25-87d6-16f92d4bcc60/console.sql">
@@ -290,13 +294,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="393">
-          <caret line="192" column="27" lean-forward="true" selection-start-line="192" selection-start-column="27" selection-end-line="192" selection-end-column="27" />
+        <state relative-caret-position="314">
+          <caret line="179" column="8" selection-start-line="179" selection-start-column="8" selection-end-line="179" selection-end-column="8" />
           <folding>
             <element signature="e#14#149#0" expanded="true" />
-            <element signature="n#!!block;n#getIDParam#0" />
-            <element signature="n#!!block;n#employeeSearchHandler#0" />
-            <element signature="e#7280#9036#0" />
+            <element signature="e#1464#2803#0" />
+            <element signature="e#2779#4433#0" />
+            <element signature="e#4405#4497#0" />
+            <element signature="e#6259#6509#0" />
             <element signature="n#!!block;n#createTable#0" />
           </folding>
         </state>

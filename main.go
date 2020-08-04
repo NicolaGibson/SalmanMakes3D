@@ -21,8 +21,8 @@ import (
  localhost:4000/employees/search/?name=Joe
  */
 
-//var db *sqlite3.db
 var ID = ""
+var param = ""
 
 type Employee struct {
 	ID                int            `json:"id"`
@@ -59,7 +59,7 @@ func init(){
 func main() {
 	http.HandleFunc("/employees", employeeHandler)
 	http.HandleFunc("/employees/", employeeByIDHandler)
-	http.HandleFunc("/employees/search", employeeSearchHandler)
+	//http.HandleFunc("/employees/?", employeeSearchHandler)
 	http.ListenAndServe(":4000", nil)
 
 
@@ -127,8 +127,6 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 }
-//resource is employee, ID is primary key
-
 
 func getIDParam(path string) (ps string){
 	//ignore first / when hitting second / return everything after as a parameter
@@ -138,7 +136,6 @@ func getIDParam(path string) (ps string){
 		}
 	}
 	ID = ps
-	fmt.Println(ps)
 	return
 }
 
@@ -173,34 +170,48 @@ func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintln(w, "Endpoint hit: Update employee record by ID")
 		case "DELETE":
 			getIDParam(r.URL.Path)
+
 			if ID == ""{
 				http.Error(w, http.StatusText(400), 400)
 				return
 			}
-			row := db.QueryRow("UPDATE employees SET employeeStatus ='Active' WHERE ID =$1", ID)
+			row := db.QueryRow("UPDATE employees SET employeeStatus ='Disabled' WHERE ID =$1", ID)
+
 			employee := new(Employee)
-			//scan input text, reads from there and stores space seperated values in successive arguements
-			result,err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
-			if err != nil{
-				http.Error(w, http.StatusText(500), 500)
+			err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
+			if err == sql.ErrNoRows {
+				http.NotFound(w, r)
 				return
-			}
-			rowsAffected, err := result.RowsAffected()
-			if err != nil {
-				http.Error(w, http.StatusText(500),500)
-				return
-			}
+			}else if err != nil {
+					fmt.Print(w, err)
+					http.Error(w, http.StatusText(500), 500)
+					return
+				}
 
-			fmt.Fprintf(w, "Employee %s created successfully (%d row affected)\n", firstName + " " + lastName, rowsAffected)
-
-
-			fmt.Fprintln(w, "Endpoint hit: Delete employee record by ID")
+				fmt.Fprintf(w, "Employee ID %d, %s, %s deleted successfully \n", employee.ID, employee.FirstName+" "+employee.LastName)
+				fmt.Fprintln(w, "Endpoint hit: Delete employee record by ID")
 		default:
 			fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET, PATCH and DELETE requests by ID")
 		}
 	}
 
 
+/*func getfirstParam(path string) (ps string){
+	//ignore first / when hitting second / return everything after as a parameter
+	for i := 1; i<len(path); i++ {
+		if path[i] == '?'{
+			for j := 0; j <len(path); j++{
+				ps = j
+			}
+
+		}
+
+	}
+	param = ps
+
+	fmt.Println(param)
+	return
+} */
 func employeeSearchHandler(w http.ResponseWriter, r*http.Request){
 	/* To Do: return employee record by name using current implementation err no such column name. Rewrite implementation using map for search by lastName, position, startDate, endDate, use map to pull out
 	different values. change url path, needs to be part of employee. Search on the employees endpoint
@@ -210,13 +221,9 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request){
 
 	switch method := r.Method; method {
 	case "GET":
-		database, err := sql.Open("sqlite3", "employee.db")
-		if err != nil {
-			panic(err)
-		}
+		//getfirstParam(r.URL.Path)
 		employees := make([]*Employee,0)
-		//firstName := r.FormValue("firstName")
-		rows, err := database.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE @firstName")
+		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE param")
 		if err != nil{
 			log.Fatal(err)
 		}
@@ -248,10 +255,6 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request){
 //|| r.URL.Query().Get ("position") != "" || r.URL.Query().Get("startDate") != "" || r.URL.Query().Get("endDate") != ""
 
 /* TO DO
- Fix creating a new employee (employeeHandler - post request)
-Split out search by ID and search
-Check with Salman about company API standards best practice
-Delete verb - DO not perm delete, create status for all employees enabled or disabled.
 Pagination
 Patch for updating employee attributes address, phone number
 
