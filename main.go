@@ -2,10 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
+	"net/url"
 )
 /*
 
@@ -22,7 +24,6 @@ import (
  */
 
 var ID = ""
-var param = ""
 
 type Employee struct {
 	ID                int            `json:"id"`
@@ -38,8 +39,9 @@ type Employee struct {
 	Position          string         `json:"position"`
 	EndDate           sql.NullString `json:"end_date"`
 	RecordCreatedDate string         `json:"record_created_date"`
-	employeeStatus    string
+	employeeStatus    string         `json:"employeeStatus"`
 }
+
 
 var db *sql.DB
 
@@ -49,7 +51,6 @@ func init(){
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	if err = db.Ping(); err != nil {
 		log.Fatal(err)
 	}
@@ -59,7 +60,7 @@ func init(){
 func main() {
 	http.HandleFunc("/employees", employeeHandler)
 	http.HandleFunc("/employees/", employeeByIDHandler)
-	//http.HandleFunc("/employees/?", employeeSearchHandler)
+	http.HandleFunc("/employees/?", employeeSearchHandler)
 	http.ListenAndServe(":4000", nil)
 
 
@@ -89,7 +90,12 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 		for _, employee := range employees {
-			fmt.Fprintf(w, "%b, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.LastName, employee.FirstName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate)
+			json, err := json.MarshalIndent(employee, "Employee", " ")
+			if err != nil {
+				log.Println(err)
+			}
+			fmt.Fprint(w, string(json))
+			//fmt.Fprintf(w, "%b, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.LastName, employee.FirstName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate)
 		}
 		fmt.Fprintln(w, "Endpoint hit: Return all employees records")
 	case "POST":
@@ -128,7 +134,7 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getIDParam(path string) (ps string){
+func getID(path string) (ps string){
 	//ignore first / when hitting second / return everything after as a parameter
 	for i := 1; i<len(path); i++ {
 		if path[i] == '/'{
@@ -139,125 +145,148 @@ func getIDParam(path string) (ps string){
 	return
 }
 
-
+//Insert, delete and update do not return rows.
 func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	switch method := r.Method; method {
 		case "GET":
-			getIDParam(r.URL.Path)
+			getID(r.URL.Path)
 
 			if ID == ""{
 				http.Error(w, http.StatusText(400), 400)
 				return
 			}
 			row := db.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus FROM employees WHERE ID =$1", ID)
+
 			employee := new(Employee)
-			//scan input text, reads from there and stores space seperated values in successive arguements
 			err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
+
 			if err == sql.ErrNoRows{
 				http.NotFound(w, r)
 				return
 			} else if err != nil{
-				fmt.Fprint(w, err)
+				fmt.Println(w, err)
 				http.Error(w, http.StatusText(500), 500)
 				return
 			}
 			fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate, employee.employeeStatus)
-			fmt.Fprint(w, "Endpoint hit: Return an employee by ID")
-
-		case "PATCH":
-
-			//UPDATE employees SET position = "Design Manager" WHERE ID = 2
-			fmt.Fprintln(w, "Endpoint hit: Update employee record by ID")
-		case "DELETE":
-			getIDParam(r.URL.Path)
-
+		/*case "PATCH":
+			getID(r.URL.Path)
 			if ID == ""{
 				http.Error(w, http.StatusText(400), 400)
 				return
 			}
-			row := db.QueryRow("UPDATE employees SET employeeStatus ='Disabled' WHERE ID =$1", ID)
 
-			employee := new(Employee)
-			err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
-			if err == sql.ErrNoRows {
-				http.NotFound(w, r)
+			if firstName == ""{
+				http.Error(w, http.StatusText(400), 400)
 				return
-			}else if err != nil {
-					fmt.Print(w, err)
-					http.Error(w, http.StatusText(500), 500)
-					return
-				}
-
-				fmt.Fprintf(w, "Employee ID %d, %s, %s deleted successfully \n", employee.ID, employee.FirstName+" "+employee.LastName)
-				fmt.Fprintln(w, "Endpoint hit: Delete employee record by ID")
-		default:
-			fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET, PATCH and DELETE requests by ID")
-		}
-	}
-
-
-/*func getfirstParam(path string) (ps string){
-	//ignore first / when hitting second / return everything after as a parameter
-	for i := 1; i<len(path); i++ {
-		if path[i] == '?'{
-			for j := 0; j <len(path); j++{
-				ps = j
 			}
 
+
+			result, err := db.Exec("UPDATE employees SET firstName = ?", firstName)
+			//result, err := db.Exec("UPDATE employees SET firstName = $1, lastName = $2, dateOfBirth =$3, addressLineOne =$4, addressLineTwo =$5, city =$6, postcode =$7, nextOfKin =$8, position =$9, endDate =$10 WHERE ID =?",ID)
+
+			if err != nil {
+				log.Println(err.Error())
+				return
+			}
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				http.Error(w, http.StatusText(500),500)
+				return
+			}
+
+			fmt.Fprintf(w, "Employee %s updated successfully (%d row affected)\n", ID, rowsAffected)
+*/
+		case "DELETE":
+			getID(r.URL.Path)
+			if ID == ""{
+				http.Error(w, http.StatusText(400), 400)
+				return
+			}
+			result, err := db.Exec("UPDATE employees SET employeeStatus ='Disabled' WHERE ID =$1", ID)
+
+			//employee := new(Employee)
+			//err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
+
+			if err != nil{
+				http.Error(w, http.StatusText(500), 500)
+				fmt.Println("DB exec error", err)
+				return
+			}
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				http.Error(w, http.StatusText(500),500)
+				fmt.Println("Results row effected error", err)
+				return
+			}
+
+			fmt.Fprintf(w, "Employee %s deleted successfully (%d row affected)\n", ID, rowsAffected)
+			fmt.Println(w, "Endpoint hit: Delete employee record by ID")
+		default:
+			fmt.Fprint(w, "Endpoint hit: This endpoint only supports GET, PATCH and DELETE requests by ID")
 		}
-
 	}
-	param = ps
 
-	fmt.Println(param)
-	return
-} */
+
 func employeeSearchHandler(w http.ResponseWriter, r*http.Request){
-	/* To Do: return employee record by name using current implementation err no such column name. Rewrite implementation using map for search by lastName, position, startDate, endDate, use map to pull out
-	different values. change url path, needs to be part of employee. Search on the employees endpoint
-	SELECT* FROM employees WHERE firstName like 'A%' OR lastName like '%AAA%' OR position like '%AAA% OR startDate like '%1111%' OR endDate like '%1111%' OR recordCreatedDate like '%1111%'
+	/*SELECT* FROM employees WHERE firstName like 'A%' OR lastName like '%AAA%' OR position like '%AAA% OR startDate like '%1111%' OR endDate like '%1111%' OR recordCreatedDate like '%1111%'
 	firstName := r.FormValue("firstName")  - OR firstName like '$1%'"
 	*/
-
 	switch method := r.Method; method {
 	case "GET":
-		//getfirstParam(r.URL.Path)
+		u, err := url.Parse("r.URL.Path")
+		fmt.Println(w, r.URL.Parse)
+		if err != nil {
+			log.Fatal(err)
+		}
+		q := u.Query()
+		fmt.Println(q["a"])
+		fmt.Println(q.Get("b"))
+		fmt.Println(q.Get(""))
+
+		if q == nil{
+			http.Error(w, http.StatusText(400), 400)
+			fmt.Println(w, http.Error)
+			return
+		}
+		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName =$1",q["a"])
 		employees := make([]*Employee,0)
-		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE param")
+
 		if err != nil{
+			fmt.Println(w, err)
 			log.Fatal(err)
 		}
 		defer rows.Close()
 
 		for rows.Next() {
 			employee := new(Employee)
-			//scan input text, reads from there and stores space seperated values in successive arguements
 			if err = rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate); err != nil{
 			panic(err)
 				}
 				employees = append(employees, employee)
 				fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate)
 			}
-			/*if r.URL.Query().Get("firstName") != "" {
-			fmt.Fprintln(w, "Endpoint hit: Search for employees by name, position or date")
-			}*/
-			if err := rows.Err(); err != nil{
-				panic(err)
-			}
+			if err == sql.ErrNoRows{
+				fmt.Println(w, err)
+			http.NotFound(w, r)
+			return
+			} else if err != nil{
+			fmt.Println(w, err)
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
 
 	default:
 		fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET requests")
 
 	}
 }
-//search should always return an array of results.
 
 //|| r.URL.Query().Get ("position") != "" || r.URL.Query().Get("startDate") != "" || r.URL.Query().Get("endDate") != ""
 
 /* TO DO
 Pagination
 Patch for updating employee attributes address, phone number
-
 */
 
 

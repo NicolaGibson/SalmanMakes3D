@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="be144e0e-ba98-4898-82d1-bdbe14b216cf" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/employee.db" beforeDir="false" afterPath="$PROJECT_DIR$/employee.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/employee.db-journal" beforeDir="false" afterPath="$PROJECT_DIR$/employee.db-journal" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/employee.db-journal" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -36,14 +37,13 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="314">
-              <caret line="179" column="8" selection-start-line="179" selection-start-column="8" selection-end-line="179" selection-end-column="8" />
+            <state relative-caret-position="244">
+              <caret line="91" column="44" lean-forward="true" selection-start-line="91" selection-start-column="44" selection-end-line="91" selection-end-column="44" />
               <folding>
-                <element signature="e#14#149#0" expanded="true" />
-                <element signature="e#1464#2803#0" />
-                <element signature="e#2779#4433#0" />
+                <element signature="e#14#126#0" expanded="true" />
                 <element signature="e#4405#4497#0" />
-                <element signature="e#6259#6509#0" />
+                <element signature="e#4870#6095#0" />
+                <element signature="e#6991#7914#0" />
                 <element signature="n#!!block;n#createTable#0" />
               </folding>
             </state>
@@ -107,6 +107,15 @@
       </list>
     </option>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>QueryrOW</find>
+      <find>QueryRow</find>
+      <find>Query</find>
+      <find>Rows</find>
+      <find>rows</find>
+    </findStrings>
+  </component>
   <component name="GOROOT" path="/usr/local/go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -120,9 +129,9 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="494" />
+    <option name="x" value="643" />
     <option name="y" value="23" />
-    <option name="width" value="707" />
+    <option name="width" value="893" />
     <option name="height" value="825" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -174,10 +183,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
+    <frame x="643" y="23" width="893" height="825" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" visible="true" weight="0.09012876" />
+      <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" visible="true" weight="0.035252646" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -190,12 +199,12 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" weight="0.3287858" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32891566" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.24578314" />
-      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" sideWeight="0.49924812" visible="true" weight="0.30150068" />
+      <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.50075185" side_tool="true" weight="0.27830833" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Database" order="3" visible="true" weight="0.021459227" />
+      <window_info anchor="right" id="Database" order="3" visible="true" weight="0.035252646" />
     </layout>
     <layout-to-restore>
       <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" type="FLOATING" visible="true" weight="0.20386267" />
@@ -224,18 +233,6 @@
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/main.go</url>
-          <line>198</line>
-          <properties />
-          <option name="timeStamp" value="29" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/1e45598b-213b-4a25-87d6-16f92d4bcc60/console.sql">
@@ -294,14 +291,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="314">
-          <caret line="179" column="8" selection-start-line="179" selection-start-column="8" selection-end-line="179" selection-end-column="8" />
+        <state relative-caret-position="244">
+          <caret line="91" column="44" lean-forward="true" selection-start-line="91" selection-start-column="44" selection-end-line="91" selection-end-column="44" />
           <folding>
-            <element signature="e#14#149#0" expanded="true" />
-            <element signature="e#1464#2803#0" />
-            <element signature="e#2779#4433#0" />
+            <element signature="e#14#126#0" expanded="true" />
             <element signature="e#4405#4497#0" />
-            <element signature="e#6259#6509#0" />
+            <element signature="e#4870#6095#0" />
+            <element signature="e#6991#7914#0" />
             <element signature="n#!!block;n#createTable#0" />
           </folding>
         </state>
