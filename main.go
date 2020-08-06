@@ -79,7 +79,7 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 		employees := make([]*Employee, 0)
 		for rows.Next() {
 			employee := new(Employee)
-			err := rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
+			err := rows.Scan(&employee.ID, &employee.LastName, &employee.FirstName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -90,14 +90,14 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 		for _, employee := range employees {
-			json, err := json.MarshalIndent(employee, "Employee", " ")
+			json, err := json.MarshalIndent(employee, "", "")
 			if err != nil {
 				log.Println(err)
 			}
 			fmt.Fprint(w, string(json))
 			//fmt.Fprintf(w, "%b, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.LastName, employee.FirstName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate)
 		}
-		fmt.Fprintln(w, "Endpoint hit: Return all employees records")
+
 	case "POST":
 		firstName := r.FormValue("firstName")
 		lastName := r.FormValue("lastName")
@@ -148,27 +148,32 @@ func getID(path string) (ps string){
 //Insert, delete and update do not return rows.
 func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	switch method := r.Method; method {
-		case "GET":
-			getID(r.URL.Path)
+	case "GET":
+		getID(r.URL.Path)
 
-			if ID == ""{
-				http.Error(w, http.StatusText(400), 400)
-				return
-			}
-			row := db.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus FROM employees WHERE ID =$1", ID)
+		if ID == "" {
+			http.Error(w, http.StatusText(400), 400)
+			return
+		}
+		row := db.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus FROM employees WHERE ID =$1", ID)
 
-			employee := new(Employee)
-			err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
-
-			if err == sql.ErrNoRows{
-				http.NotFound(w, r)
-				return
-			} else if err != nil{
-				fmt.Println(w, err)
-				http.Error(w, http.StatusText(500), 500)
-				return
-			}
-			fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate, employee.employeeStatus)
+		employee := new(Employee)
+		err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
+		if err == sql.ErrNoRows {
+			http.NotFound(w, r)
+			fmt.Println(w, "sql error", err)
+			return
+		} else if err != nil {
+			fmt.Println(w, err)
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+		json, err := json.MarshalIndent(employee, "", "")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprint(w, string(json))
+			//fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate, employee.employeeStatus)
 		/*case "PATCH":
 			getID(r.URL.Path)
 			if ID == ""{
@@ -221,7 +226,6 @@ func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			fmt.Fprintf(w, "Employee %s deleted successfully (%d row affected)\n", ID, rowsAffected)
-			fmt.Println(w, "Endpoint hit: Delete employee record by ID")
 		default:
 			fmt.Fprint(w, "Endpoint hit: This endpoint only supports GET, PATCH and DELETE requests by ID")
 		}

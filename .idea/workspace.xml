@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="be144e0e-ba98-4898-82d1-bdbe14b216cf" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/employee.db" beforeDir="false" afterPath="$PROJECT_DIR$/employee.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/employee.db-journal" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -37,13 +34,14 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="244">
-              <caret line="91" column="44" lean-forward="true" selection-start-line="91" selection-start-column="44" selection-end-line="91" selection-end-column="44" />
+            <state relative-caret-position="343">
+              <caret line="171" column="58" selection-start-line="171" selection-start-column="58" selection-end-line="171" selection-end-column="58" />
               <folding>
                 <element signature="e#14#126#0" expanded="true" />
+                <element signature="e#3221#4584#0" />
                 <element signature="e#4405#4497#0" />
-                <element signature="e#4870#6095#0" />
                 <element signature="e#6991#7914#0" />
+                <element signature="n#!!block;n#employeeSearchHandler#0" />
                 <element signature="n#!!block;n#createTable#0" />
               </folding>
             </state>
@@ -129,7 +127,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="643" />
+    <option name="x" value="652" />
     <option name="y" value="23" />
     <option name="width" value="893" />
     <option name="height" value="825" />
@@ -183,7 +181,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="643" y="23" width="893" height="825" extended-state="0" />
+    <frame x="652" y="23" width="893" height="825" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" visible="true" weight="0.035252646" />
@@ -291,13 +289,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="244">
-          <caret line="91" column="44" lean-forward="true" selection-start-line="91" selection-start-column="44" selection-end-line="91" selection-end-column="44" />
+        <state relative-caret-position="343">
+          <caret line="171" column="58" selection-start-line="171" selection-start-column="58" selection-end-line="171" selection-end-column="58" />
           <folding>
             <element signature="e#14#126#0" expanded="true" />
+            <element signature="e#3221#4584#0" />
             <element signature="e#4405#4497#0" />
-            <element signature="e#4870#6095#0" />
             <element signature="e#6991#7914#0" />
+            <element signature="n#!!block;n#employeeSearchHandler#0" />
             <element signature="n#!!block;n#createTable#0" />
           </folding>
         </state>
