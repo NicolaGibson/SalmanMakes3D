@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
 	"net/url"
+	_"github.com/gorilla/mux"
 )
 /*
 
@@ -31,19 +33,20 @@ type Employee struct {
 	LastName          string         `json:"last_name"`
 	DateOfBirth       string         `json:"date_of_birth"`
 	AddressLineOne    string         `json:"address_line_one"`
-	AddressLineTwo    sql.NullString `json:"address_line_two"`
+	AddressLineTwo    sql.NullString `json:"address_line_two,omitempty"`
 	City              string         `json:"city"`
 	Postcode          string         `json:"postcode"`
 	StartDate         string         `json:"start_date"`
 	NextOfKin         string         `json:"next_of_kin"`
 	Position          string         `json:"position"`
-	EndDate           sql.NullString `json:"end_date"`
+	EndDate           sql.NullString `json:"end_date,omitempty"`
 	RecordCreatedDate string         `json:"record_created_date"`
 	employeeStatus    string         `json:"employeeStatus"`
 }
 
 
 var db *sql.DB
+
 
 func init(){
 	var err error
@@ -58,9 +61,11 @@ func init(){
 
 
 func main() {
-	http.HandleFunc("/employees", employeeHandler)
+	r := mux.NewRouter()
+	r.HandleFunc("/employees", employeeHandler)
 	http.HandleFunc("/employees/", employeeByIDHandler)
-	http.HandleFunc("/employees/?", employeeSearchHandler)
+	r.HandleFunc("/employees/?{key}", employeeSearchHandler)
+	http.Handle("/", r)
 	http.ListenAndServe(":4000", nil)
 
 
@@ -117,6 +122,7 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		result, err := db.Exec("INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, employeeStatus) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, employeeStatus)
 		if err != nil{
+			fmt.Println(w, err)
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
@@ -144,6 +150,7 @@ func getID(path string) (ps string){
 	ID = ps
 	return
 }
+
 
 //Insert, delete and update do not return rows.
 func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
@@ -175,16 +182,8 @@ func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, string(json))
 			//fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate, employee.employeeStatus)
 		/*case "PATCH":
-			getID(r.URL.Path)
-			if ID == ""{
-				http.Error(w, http.StatusText(400), 400)
-				return
-			}
+			v:r.URL.Query()
 
-			if firstName == ""{
-				http.Error(w, http.StatusText(400), 400)
-				return
-			}
 
 
 			result, err := db.Exec("UPDATE employees SET firstName = ?", firstName)
@@ -230,7 +229,6 @@ func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "Endpoint hit: This endpoint only supports GET, PATCH and DELETE requests by ID")
 		}
 	}
-
 
 func employeeSearchHandler(w http.ResponseWriter, r*http.Request){
 	/*SELECT* FROM employees WHERE firstName like 'A%' OR lastName like '%AAA%' OR position like '%AAA% OR startDate like '%1111%' OR endDate like '%1111%' OR recordCreatedDate like '%1111%'
