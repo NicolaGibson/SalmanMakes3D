@@ -36,17 +36,14 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="227">
-              <caret line="71" column="1" lean-forward="true" selection-start-line="71" selection-start-column="1" selection-end-line="71" selection-end-column="1" />
+            <state relative-caret-position="255">
+              <caret line="69" column="1" lean-forward="true" selection-start-line="69" selection-start-column="1" selection-end-line="69" selection-end-column="1" />
               <folding>
                 <element signature="e#14#126#0" expanded="true" />
-                <element signature="n#!!block;n#employeeHandler#0" />
-                <element signature="e#1774#3115#0" />
                 <element signature="n#!!block;n#getID#0" />
-                <element signature="n#!!block;n#employeeByIDHandler#0" />
                 <element signature="e#4954#6328#0" />
                 <element signature="e#6328#8061#0" />
-                <element signature="n#!!block;n#employeeSearchHandler#0" />
+                <element signature="e#8194#8451#0" />
                 <element signature="n#!!block;n#createTable#0" />
               </folding>
             </state>
@@ -132,9 +129,9 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="714" />
+    <option name="x" value="687" />
     <option name="y" value="23" />
-    <option name="width" value="893" />
+    <option name="width" value="820" />
     <option name="height" value="825" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -144,7 +141,31 @@
     </navigator>
     <panes>
       <pane id="Scope" />
-      <pane id="ProjectPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="salmanMakes" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+            </path>
+            <path>
+              <item name="salmanMakes" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go Modules &lt;salmanMakes&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+            </path>
+            <path>
+              <item name="salmanMakes" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Scratches and Consoles" type="1a2a3e82:ScratchProjectViewPane$MyProjectNode" />
+            </path>
+            <path>
+              <item name="salmanMakes" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Scratches and Consoles" type="1a2a3e82:ScratchProjectViewPane$MyProjectNode" />
+              <item name="Database Consoles" type="d62648e6:ScratchProjectViewPane$MyRootNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -186,9 +207,9 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="714" y="23" width="893" height="825" extended-state="0" />
+    <frame x="687" y="23" width="820" height="825" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" visible="true" weight="0.035252646" />
+      <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" visible="true" weight="0.038560413" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -206,7 +227,7 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Database" order="3" visible="true" weight="0.035252646" />
+      <window_info anchor="right" id="Database" order="3" visible="true" weight="0.038560413" />
     </layout>
     <layout-to-restore>
       <window_info content_ui="combo" x="398" y="258" width="285" height="601" id="Project" order="0" type="FLOATING" visible="true" weight="0.20386267" />
@@ -293,17 +314,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="227">
-          <caret line="71" column="1" lean-forward="true" selection-start-line="71" selection-start-column="1" selection-end-line="71" selection-end-column="1" />
+        <state relative-caret-position="255">
+          <caret line="69" column="1" lean-forward="true" selection-start-line="69" selection-start-column="1" selection-end-line="69" selection-end-column="1" />
           <folding>
             <element signature="e#14#126#0" expanded="true" />
-            <element signature="n#!!block;n#employeeHandler#0" />
-            <element signature="e#1774#3115#0" />
             <element signature="n#!!block;n#getID#0" />
-            <element signature="n#!!block;n#employeeByIDHandler#0" />
             <element signature="e#4954#6328#0" />
             <element signature="e#6328#8061#0" />
-            <element signature="n#!!block;n#employeeSearchHandler#0" />
+            <element signature="e#8194#8451#0" />
             <element signature="n#!!block;n#createTable#0" />
           </folding>
         </state>

@@ -8,7 +8,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
-	"net/url"
 	_"github.com/gorilla/mux"
 )
 /*
@@ -62,12 +61,11 @@ func init(){
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/employees", employeeHandler)
-	http.HandleFunc("/employees/", employeeByIDHandler)
-	r.HandleFunc("/employees/?{key}", employeeSearchHandler)
-	http.Handle("/", r)
-	http.ListenAndServe(":4000", nil)
-
+	s := r.PathPrefix("/employees").Subrouter()
+	s.HandleFunc("/", employeeHandler)
+	s.HandleFunc("/ID:[0-9]+}", employeeByIDHandler).Name("employee")
+	s.HandleFunc("/?{key}", employeeSearchHandler).Methods("GET")
+	http.ListenAndServe(":4000", r)
 
 }
 
@@ -140,7 +138,7 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getID(path string) (ps string){
+/*func getID(path string) (ps string){
 	//ignore first / when hitting second / return everything after as a parameter
 	for i := 1; i<len(path); i++ {
 		if path[i] == '/'{
@@ -149,7 +147,7 @@ func getID(path string) (ps string){
 	}
 	ID = ps
 	return
-}
+} */
 
 
 //Insert, delete and update do not return rows.
@@ -157,7 +155,6 @@ func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	switch method := r.Method; method {
 	case "GET":
 		getID(r.URL.Path)
-
 		if ID == "" {
 			http.Error(w, http.StatusText(400), 400)
 			return
@@ -234,24 +231,17 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request){
 	/*SELECT* FROM employees WHERE firstName like 'A%' OR lastName like '%AAA%' OR position like '%AAA% OR startDate like '%1111%' OR endDate like '%1111%' OR recordCreatedDate like '%1111%'
 	firstName := r.FormValue("firstName")  - OR firstName like '$1%'"
 	*/
-	switch method := r.Method; method {
-	case "GET":
-		u, err := url.Parse("r.URL.Path")
-		fmt.Println(w, r.URL.Parse)
-		if err != nil {
-			log.Fatal(err)
-		}
-		q := u.Query()
-		fmt.Println(q["a"])
-		fmt.Println(q.Get("b"))
-		fmt.Println(q.Get(""))
+		/* firstName := mux.Vars(r)["firstName"]
+		key := r.FormValue("key")
 
-		if q == nil{
-			http.Error(w, http.StatusText(400), 400)
-			fmt.Println(w, http.Error)
+		/*u, err := r.Get("employeeSearchHandler").URL("firstName", firstName, "key", key)
+		if err !=nil {
+			http.Error (w, err.Error(), 500)
 			return
 		}
-		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName =$1",q["a"])
+		w.Write([]byte(u.String()))
+
+		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName =$1")
 		employees := make([]*Employee,0)
 
 		if err != nil{
@@ -276,12 +266,9 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request){
 			fmt.Println(w, err)
 			http.Error(w, http.StatusText(500), 500)
 			return
-		}
+		} */
 
-	default:
-		fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET requests")
 
-	}
 }
 
 //|| r.URL.Query().Get ("position") != "" || r.URL.Query().Get("startDate") != "" || r.URL.Query().Get("endDate") != ""
