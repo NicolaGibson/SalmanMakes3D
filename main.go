@@ -60,11 +60,11 @@ func init(){
 
 func main() {
 	r := mux.NewRouter()
-	//r.HandleFunc("/employees", employeeHandler)
-	//http.HandleFunc("/employees/", employeeByIDHandler)
-	//r.HandleFunc("/employees/{id}", getEmployeeByIDHandler).Methods("GET")
-	//r.HandleFunc("/employees/{id}", employeeByIDHandler).Methods("DELETE")
-	r.HandleFunc("/employees", employeeSearchHandler).Methods("GET")
+	r.HandleFunc("/employees", employeeHandler)
+	r.HandleFunc("/employees/{id}", getEmployeeByIDHandler).Methods("GET")
+	r.HandleFunc("/employees/{id}", deleteEmployeeByIDHandler).Methods("DELETE")
+	r.HandleFunc ("/employees/{id}", updateEmployeeByIDHandler).Methods("PATCH")
+	//r.HandleFunc("/employees", employeeSearchHandler).Methods("GET")
 	log.Fatal(http.ListenAndServe(":4000", r))
 
 }
@@ -72,7 +72,7 @@ func main() {
 func employeeHandler(w http.ResponseWriter, r *http.Request) {
 	switch method := r.Method; method {
 	case "GET":
-		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees ORDER BY lastName ASC LIMIT 0, 50")
+		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus FROM employees ORDER BY firstName ASC LIMIT 0, 50")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -81,7 +81,7 @@ func employeeHandler(w http.ResponseWriter, r *http.Request) {
 		employees := make([]*Employee, 0)
 		for rows.Next() {
 			employee := new(Employee)
-			err := rows.Scan(&employee.ID, &employee.LastName, &employee.FirstName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
+			err := rows.Scan(&employee.ID, &employee.LastName, &employee.FirstName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -161,93 +161,65 @@ func getEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//Insert, delete and update do not return rows.
-//func employeeByIDHandler(w http.ResponseWriter, r *http.Request) {
-//	switch method := r.Method; method {
-//	case "GET":
-//		getID(r.URL.Path)
-//		if ID == "" {
-//			http.Error(w, http.StatusText(400), 400)
-//			return
-//		}
-//		row := db.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus FROM employees WHERE ID =$1", ID)
-//
-//		employee := new(Employee)
-//		err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
-//		if err == sql.ErrNoRows {
-//			http.NotFound(w, r)
-//			fmt.Println(w, "sql error", err)
-//			return
-//		} else if err != nil {
-//			fmt.Println(w, err)
-//			http.Error(w, http.StatusText(500), 500)
-//			return
-//		}
-//		json, err := json.MarshalIndent(employee, "", "")
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		fmt.Fprint(w, string(json))
-//			//fmt.Fprintf(w, "%d, %s %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", employee.ID, employee.FirstName, employee.LastName, employee.DateOfBirth, employee.AddressLineOne, employee.AddressLineTwo, employee.City, employee.Postcode, employee.StartDate, employee.NextOfKin, employee.Position, employee.EndDate, employee.RecordCreatedDate, employee.employeeStatus)
-//		/*case "PATCH":
-//			v:r.URL.Query()
-//
-//
-//
-//			result, err := db.Exec("UPDATE employees SET firstName = ?", firstName)
-//			//result, err := db.Exec("UPDATE employees SET firstName = $1, lastName = $2, dateOfBirth =$3, addressLineOne =$4, addressLineTwo =$5, city =$6, postcode =$7, nextOfKin =$8, position =$9, endDate =$10 WHERE ID =?",ID)
-//
-//			if err != nil {
-//				log.Println(err.Error())
-//				return
-//			}
-//			rowsAffected, err := result.RowsAffected()
-//			if err != nil {
-//				http.Error(w, http.StatusText(500),500)
-//				return
-//			}
-//
-//			fmt.Fprintf(w, "Employee %s updated successfully (%d row affected)\n", ID, rowsAffected)
-//*/
-//		case "DELETE":
-//			getID(r.URL.Path)
-//			if ID == ""{
-//				http.Error(w, http.StatusText(400), 400)
-//				return
-//			}
-//			result, err := db.Exec("UPDATE employees SET employeeStatus ='Disabled' WHERE ID =$1", ID)
-//
-//			//employee := new(Employee)
-//			//err := row.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
-//
-//			if err != nil{
-//				http.Error(w, http.StatusText(500), 500)
-//				fmt.Println("DB exec error", err)
-//				return
-//			}
-//			rowsAffected, err := result.RowsAffected()
-//			if err != nil {
-//				http.Error(w, http.StatusText(500),500)
-//				fmt.Println("Results row effected error", err)
-//				return
-//			}
-//
-//			fmt.Fprintf(w, "Employee %s deleted successfully (%d row affected)\n", ID, rowsAffected)
-//		default:
-//			fmt.Fprint(w, "Endpoint hit: This endpoint only supports GET, PATCH and DELETE requests by ID")
-//		}
-//	}
+func deleteEmployeeByIDHandler(w http.ResponseWriter, r *http.Request){
+	muxvars := mux.Vars(r)
+	ID := muxvars["id"]
+	result, err := db.Exec("UPDATE employees SET employeeStatus ='Disabled' WHERE ID =$1", ID)
+	if err == sql.ErrNoRows {
+		http.NotFound(w, r)
+		fmt.Println("sql no rows error", err)
+		return
+	} else if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, err)
+		return
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Fprintf(w, "Employee %s deleted successfully (%d row affected)\n", ID, rowsAffected)
+}
+
+
+func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
+	muxvars := mux.Vars(r)
+	ID := muxvars["id"]
+	result, err := db.Exec("UPDATE employees SET firstName = $2 OR lastName = $2 OR dateOfBirth = $2 OR addressLineOne = $2 OR addressLineTwo = $2 OR city = $2 OR postcode = $2 OR nextOfKin = $2 OR position = $2 OR endDate = $2 WHERE ID = $1",ID)
+	if err == sql.ErrNoRows {
+		http.NotFound(w, r)
+		fmt.Println("sql no rows error", err)
+		return
+	} else if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, err)
+		return
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Fprintf(w, "Employee %s updated successfully (%d row affected)\n", ID, rowsAffected)
+	}
 
 func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
+
 	// 1. Get the filter criteria
 	//1b. Get criteria to work with different fields.
 	filterValues := r.URL.Query()
 	fmt.Printf("%+v\n", filterValues)
 
-	if filterValues["first_name"][0] != ""{
-		fmt.Printf("Value: %s *****\n", filterValues["first_name"][0])
+	/*firstName := filterValues.Get("first_name")
+	lastName := filterValues.Get("last_name")
 
-		//var firstName string = filterValues["first_name"][0]
+	if filterValues[firstName][0] != "" || filterValues[firstName][0] != "" {
+		fmt
+	}
+	/*if filterValues["first_name"][0] != ""{
+		fmt.Printf("Value: %s *****\n", filterValues["first_name"][0])
+*/
 		var firstName string = filterValues["first_name"][0]
 		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE $1", firstName)
 		if err != nil {
@@ -292,9 +264,8 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 		}
 	}
 
-}
-
-/*func createTable() {
+/*
+	func createTable() {
 	CREATE TABLE "employees" ( "ID" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, "firstName" TEXT NOT NULL, "lastName" TEXT NOT NULL, "dateOfBirth" TEXT NOT NULL, "addressLineOne" TEXT NOT NULL, "addressLineTwo" TEXT, "city" TEXT NOT NULL, "postcode" TEXT NOT NULL, "startDate" TEXT NOT NULL, "nextOfKin" TEXT NOT NULL, "position" TEXT NOT NULL, "endDate" INTEGER, "recordCreatedDate" TEXT DEFAULT CURRENT_TIMESTAMP)
 	INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, city, postcode, startDate, nextOfKin, position)
 	VALUES ('Salman','Ahmed','1999-01-01 00:00:00:000','33 Holborn', 'London', 'EC1N 2HT','2020-01-09 00:00:00.000', 'Steve Stotter','CEO');
@@ -302,4 +273,4 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 	INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, city, postcode, startDate, nextOfKin, position)
 	  VALUES ('Joe','Jenkins','1992-03-31 00:00:00:000','12 Little Tree Lane', 'London', 'E7 0TR','2020-03-10 00:00:00.000', 'Laura Jenkins','Head of Design');
 
-}*/
+} */
