@@ -47,7 +47,6 @@ type Employee struct {
 
 var db *sql.DB
 
-
 func init(){
 	var err error
 	db, err = sql.Open("sqlite3", "employee.db")
@@ -68,7 +67,7 @@ func main() {
 	r.HandleFunc("/employees/{id:[0-9]+}", deleteEmployeeByIDHandler).Methods("DELETE")
 	r.HandleFunc ("/employees/{id:[0-9]+}", updateEmployeeByIDHandler).Methods("PATCH")
 	//r.HandleFunc("/employees", employeeSearchHandler).Methods("GET")
-	log.Fatal(http.ListenAndServe(":4000", r))
+	log.Fatal(http.ListenAndServe(":5000", r))
 
 }
 
@@ -157,7 +156,6 @@ func getEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json, err := json.MarshalIndent(employee, "", "")
-	fmt.Printf("%q", json)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -187,21 +185,44 @@ func deleteEmployeeByIDHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
+	var param = "";
 	muxvars := mux.Vars(r)
 	id := muxvars["id"]
 	ID, _ := strconv.Atoi(id)
 	query := r.URL.Query()
-	//updateByExample
-	fmt.Println(muxvars)
-	fmt.Println(query)
-	//loop through, create a string, base part update employees set. Look up query builder & query by example
+
+
+	for k,v := range query{
+		fmt.Println(k)
+		for _, v := range v {
+			//fmt.Println(v)
+			if k == "firstName" {
+				param = v
+				firstName := param
+				fmt.Println(firstName)
+			}
+			if k == "lastName" {
+				param = v
+				lastName := param
+				fmt.Println(lastName)
+			}
+			if k == "dateOfBirth"{
+				param = v
+				dateOfBirth := param
+				fmt.Println(dateOfBirth)
+			}
+		}
+	}
+
+	//loop through query, create a string, base part update employees set. Look up query builder & query by example
 	firstName := query["firstName"][0]
+	lastName := query["lastName"][0]
 
 	tx, _ := db.Begin()
-	stmt, _ := tx.Prepare("UPDATE employees SET firstName = ? WHERE ID = ?")
-	_, err := stmt.Exec(firstName, ID)
+	stmt, _ := tx.Prepare("UPDATE employees SET firstName = ?, lastName = ? WHERE ID = ?")
+	result, err := stmt.Exec(firstName, lastName, ID)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, err)
 		return
 	}
@@ -215,13 +236,12 @@ func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err)
 		return
 	}
-	/*rowsAffected, err := result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		log.Fatal(err)
 		return
-	}*/
-	//fmt.Fprintf(w, "Employee %s updated successfully (%d row affected)\n", ID, rowsAffected)
-	fmt.Fprintf(w, "Employee %s updated successfully\n", ID)
+	}
+	fmt.Fprintf(w, "Employee %d updated successfully (%d row affected)\n", ID, rowsAffected)
 
 }
 
