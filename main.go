@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/lann/builder"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
+	_ "github.com/Masterminds/squirrel"
+
+
 )
 /*
 
@@ -26,6 +29,8 @@ import (
  */
 
 var ID = ""
+
+type UpdateBuilder builder.Builder
 
 type Employee struct {
 	ID                int            `json:"id"`
@@ -50,25 +55,33 @@ var db *sql.DB
 func init(){
 	var err error
 	db, err = sql.Open("sqlite3", "employee.db")
+	builder.Register(UpdateBuilder{}, updateData{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	if err = db.Ping(); err != nil {
 		log.Fatal(err)
 	}
+
+
 }
 
+type setClause struct {
+	column string
+	value  interface{}
+}
 
 
 func main() {
 	r := mux.NewRouter()
+	r.Path("/employees").HandlerFunc(employeeHandler)
 	r.HandleFunc("/employees", employeeHandler)
 	r.HandleFunc("/employees/{id:[0-9]+}", getEmployeeByIDHandler).Methods("GET")
 	r.HandleFunc("/employees/{id:[0-9]+}", deleteEmployeeByIDHandler).Methods("DELETE")
 	r.HandleFunc ("/employees/{id:[0-9]+}", updateEmployeeByIDHandler).Methods("PATCH")
-	//r.HandleFunc("/employees", employeeSearchHandler).Methods("GET")
-	log.Fatal(http.ListenAndServe(":5000", r))
-
+	r.HandleFunc("/employees", employeeSearchHandler).Methods("GET").Queries("key, {[0-9A-Za-z_]}")
+	//r.Path("/employees{id:[0-9]+}").HandlerFunc(employeeSearchHandler)
+	log.Fatal(http.ListenAndServe(":4000", r))
 }
 
 func employeeHandler(w http.ResponseWriter, r *http.Request) {
@@ -185,17 +198,15 @@ func deleteEmployeeByIDHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
-	var param = "";
+	var param= "";
 	muxvars := mux.Vars(r)
 	id := muxvars["id"]
 	ID, _ := strconv.Atoi(id)
 	query := r.URL.Query()
 
-
-	for k,v := range query{
+	for k, v := range query {
 		fmt.Println(k)
 		for _, v := range v {
-			//fmt.Println(v)
 			if k == "firstName" {
 				param = v
 				firstName := param
@@ -206,55 +217,108 @@ func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 				lastName := param
 				fmt.Println(lastName)
 			}
-			if k == "dateOfBirth"{
+			if k == "dateOfBirth" {
 				param = v
 				dateOfBirth := param
 				fmt.Println(dateOfBirth)
 			}
+			if k == "addressLineOne" {
+				param = v
+				addressLineOne := param
+				fmt.Println(addressLineOne)
+			}
+			if k == "addressLineTwo" {
+				param = v
+				addressLineTwo := param
+				fmt.Println(addressLineTwo)
+			}
+			if k == "city" {
+				param = v
+				city := param
+				fmt.Println(city)
+			}
+			if k == "postcode" {
+				param = v
+				postcode := param
+				fmt.Println(postcode)
+			}
+			if k == "nextOfKin" {
+				param = v
+				nextOfKin := param
+				fmt.Println(nextOfKin)
+			}
+			if k == "nextOfKin" {
+				param = v
+				nextOfKin := param
+				fmt.Println(nextOfKin)
+			}
 		}
-	}
 
-	//loop through query, create a string, base part update employees set. Look up query builder & query by example
-	firstName := query["firstName"][0]
-	lastName := query["lastName"][0]
+		//loop through query, create a string, base part update employees set. Look up query builder & query by example
+		firstName := query["firstName"][0]
+		lastName := query["lastName"][0]
 
-	tx, _ := db.Begin()
-	stmt, _ := tx.Prepare("UPDATE employees SET firstName = ?, lastName = ? WHERE ID = ?")
-	result, err := stmt.Exec(firstName, lastName, ID)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, err)
-		return
-	}
-	tx.Commit()
-	if err == sql.ErrNoRows {
-		http.NotFound(w, r)
-		fmt.Println("sql no rows error", err)
-		return
-	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, err)
-		return
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	fmt.Fprintf(w, "Employee %d updated successfully (%d row affected)\n", ID, rowsAffected)
+		tx, _ := db.Begin()
 
+		func (b UpdateBuilder) SetMap(clauses map[string]interface{}) UpdateBuilder {
+			keys := make([]string, len(clauses))
+			i := 0
+			for key := range clauses {
+			keys[i] = key
+			i++
+		}
+			sort.Strings(keys)
+			for _, key := range keys {
+			val, _ := clauses[key]
+			b = b.Set(key, val)
+		}
+			return b
+		}
+
+		/*queryString, err := fmt.Fprint(w,"UPDATE employees SET"
+		if firstName != "" {
+		 "firstName = ?"
+		}
+		"WHERE ID = ?") */
+
+
+
+		stmt, _ := tx.Prepare("UPDATE employees SET firstName = ?, lastName = ? WHERE ID = ?")
+
+		result, err := stmt.Exec(firstName, lastName, ID)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+			return
+		}
+		tx.Commit()
+		if err == sql.ErrNoRows {
+			http.NotFound(w, r)
+			fmt.Println("sql no rows error", err)
+			return
+		} else if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+			return
+		}
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		fmt.Fprintf(w, "Employee %d updated successfully (%d row affected)\n", ID, rowsAffected)
+
+	}
 }
-
-
 func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 
 	// 1. Get the filter criteria
 	//1b. Get criteria to work with different fields.
 
-	/*filterValues := r.URL.Query()
+	filterValues := r.URL.Query()
 	fmt.Printf("%+v\n", filterValues)
 
-	if filterValues["first_name"][0] != ""{
+	if filterValues["first_name"][0] != "" {
 		fmt.Printf("Value: %s *****\n", filterValues["first_name"][0])
 
 		var firstName string = filterValues["first_name"][0]
@@ -264,29 +328,6 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, err)
 			return
-
-		} */
-
-	str := r.URL.String()
-	filterValues, _ := url.Parse(str)
-	fmt.Println("original:", filterValues)
-	q, _ := url.ParseQuery(filterValues.RawQuery)
-
-	for key, value := range q {
-		fmt.Fprint(w, key, ":", value)
-		filterValues.RawQuery = q.Encode()
-	}
-
-	return
-}
-
-/*		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE $1", q)
-		if err != nil {
-			log.Fatal(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, err)
-			return
-
 		}
 		defer rows.Close()
 
@@ -302,7 +343,6 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 				return
 			}
 			employees = append(employees, employee)
-
 		}
 		fmt.Printf("%+v\n", employees)
 		if err = rows.Err(); err != nil {
@@ -322,7 +362,21 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 			fmt.Fprint(w, string(json))
 		}
 	}
+}
 
+/*
+		str := r.URL.String()
+		filterValues, _ := url.Parse(str)
+		fmt.Println("original:", filterValues)
+		q, _ := url.ParseQuery(filterValues.RawQuery)
+
+		for key, value := range q {
+			fmt.Fprint(w, key, ":", value)
+			filterValues.RawQuery = q.Encode()
+		}
+
+		return
+	} */
 /*
 	func createTable() {
 	CREATE TABLE "employees" ( "ID" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, "firstName" TEXT NOT NULL, "lastName" TEXT NOT NULL, "dateOfBirth" TEXT NOT NULL, "addressLineOne" TEXT NOT NULL, "addressLineTwo" TEXT, "city" TEXT NOT NULL, "postcode" TEXT NOT NULL, "startDate" TEXT NOT NULL, "nextOfKin" TEXT NOT NULL, "position" TEXT NOT NULL, "endDate" INTEGER, "recordCreatedDate" TEXT DEFAULT CURRENT_TIMESTAMP)
