@@ -283,15 +283,8 @@ func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 
 	//}
 }
+
 func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
-	/*
-	   func (d *selectData) Query() (*sql.Rows, error) {
-	   	if d.RunWith == nil {
-	   		return nil, RunnerNotSet
-	   	}
-	   	return QueryWith(d.RunWith, d)
-	   }
-	*/
 	filterValues := r.URL.Query()
 	fmt.Println("%+v\n", filterValues)
 	var employeeReq Employee
@@ -333,9 +326,9 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 		d = d.Set("addressLineOne", employeeReq.AddressLineOne)
 	}
 
-	/*if employeeReq.AddressLineTwo != "" {
+	if employeeReq.AddressLineTwo != "" {
 		d = d.Set("addressLineTwo", employeeReq.AddressLineOne)
-	}*/
+	}
 
 	if employeeReq.City != "" {
 		d = d.Set("city", employeeReq.City)
@@ -356,9 +349,9 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 		d = d.Set("position", employeeReq.Position)
 	}
 
-	/*if employeeReq.EndDate == "inactive" {
+	if employeeReq.EndDate == "inactive" {
 		d = d.Set("endDate", employeeReq.EndDate)
-	}*/
+	}
 
 	mysql, args, err := d.ToSql()
 	if err != nil {
@@ -372,13 +365,14 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 	}
 
 	return
-
+}
 	/*
-
 		users := sq.Select("ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus").From("employees")
 		sql, args, err := users.ToSql()
 		fmt.Println(sql, args, err)
 
+		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE $1", firstName)
+
 		if err != nil {
 				log.Fatal(err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -416,107 +410,5 @@ func employeeSearchHandler(w http.ResponseWriter, r*http.Request) {
 					return
 				}
 				fmt.Fprint(w, string(json))
-			}
-		}
+			} */
 
-	/*	rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE $1", firstName)
-		if err != nil {
-			log.Fatal(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, err)
-			return
-		}
-		defer rows.Close()
-
-		employees := make([]*Employee, 0)
-		for rows.Next() {
-			fmt.Println("Employee found")
-			employee := new(Employee)
-			err := rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
-			if err != nil {
-				log.Fatal(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, err)
-				return
-			}
-			employees = append(employees, employee)
-		}
-		fmt.Printf("%+v\n", employees)
-		if err = rows.Err(); err != nil {
-			log.Fatal(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, err)
-			return
-		}
-		for _, employee := range employees {
-			json, err := json.MarshalIndent(employee, "", "")
-			if err != nil {
-				log.Println(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, err)
-				return
-			}
-			fmt.Fprint(w, string(json))
-		}
-	} */
-
-	/*filterValues := r.URL.Query()
-		fmt.Printf("%+v\n", filterValues)
-
-		if filterValues["first_name"][0] != "" {
-			fmt.Printf("Value: %s *****\n", filterValues["first_name"][0])
-
-			var firstName string = filterValues["first_name"][0]
-			rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE $1", firstName)
-			if err != nil {
-				log.Fatal(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, err)
-				return
-			}
-			defer rows.Close()
-
-			employees := make([]*Employee, 0)
-			for rows.Next() {
-				fmt.Println("Employee found")
-				employee := new(Employee)
-				err := rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
-				if err != nil {
-					log.Fatal(err)
-					w.WriteHeader(http.StatusInternalServerError)
-					fmt.Fprint(w, err)
-					return
-				}
-				employees = append(employees, employee)
-			}
-			fmt.Printf("%+v\n", employees)
-			if err = rows.Err(); err != nil {
-				log.Fatal(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, err)
-				return
-			}
-			for _, employee := range employees {
-				json, err := json.MarshalIndent(employee, "", "")
-				if err != nil {
-					log.Println(err)
-					w.WriteHeader(http.StatusInternalServerError)
-					fmt.Fprint(w, err)
-					return
-				}
-				fmt.Fprint(w, string(json))
-			}
-		} /*
-
-	/*
-		func createTable() {
-		CREATE TABLE "employees" ( "ID" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, "firstName" TEXT NOT NULL, "lastName" TEXT NOT NULL, "dateOfBirth" TEXT NOT NULL, "addressLineOne" TEXT NOT NULL, "addressLineTwo" TEXT, "city" TEXT NOT NULL, "postcode" TEXT NOT NULL, "startDate" TEXT NOT NULL, "nextOfKin" TEXT NOT NULL, "position" TEXT NOT NULL, "endDate" INTEGER, "recordCreatedDate" TEXT DEFAULT CURRENT_TIMESTAMP)
-		INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, city, postcode, startDate, nextOfKin, position)
-		VALUES ('Salman','Ahmed','1999-01-01 00:00:00:000','33 Holborn', 'London', 'EC1N 2HT','2020-01-09 00:00:00.000', 'Steve Stotter','CEO');
-
-		INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, city, postcode, startDate, nextOfKin, position)
-		  VALUES ('Joe','Jenkins','1992-03-31 00:00:00:000','12 Little Tree Lane', 'London', 'E7 0TR','2020-03-10 00:00:00.000', 'Laura Jenkins','Head of Design');
-
-	} */
-}
-//curl -v -XPATCH -d"{\"last_name\":\"Ahmed\", \"first_name\": \"Steve\"}"
