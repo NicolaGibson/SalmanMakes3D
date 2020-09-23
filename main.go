@@ -1,23 +1,16 @@
 package main
 
 import (
-	//"bytes"
-	//"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	//"github.com/lann/builder"
+	sq "github.com/Masterminds/squirrel"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
 	"strconv"
-	sq "github.com/Masterminds/squirrel"
-
-
 )
-
-var ID = ""
 
 type Employee struct {
 	ID                int            `json:"id"`
@@ -38,7 +31,7 @@ type Employee struct {
 
 var db *sql.DB
 
-func init(){
+func init() {
 	var err error
 	db, err = sql.Open("sqlite3", "employee.db")
 	if err != nil {
@@ -54,83 +47,43 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/employees/{id:[0-9]+}", getEmployeeByIDHandler).Methods("GET")
 	r.HandleFunc("/employees/{id:[0-9]+}", deleteEmployeeByIDHandler).Methods("DELETE")
-	r.HandleFunc ("/employees/{id:[0-9]+}", updateEmployeeByIDHandler).Methods("PATCH")
+	r.HandleFunc("/employees/{id:[0-9]+}", updateEmployeeByIDHandler).Methods("PATCH")
 	r.HandleFunc("/employees", employeeSearchHandler).Methods("GET")
-	//r.HandleFunc("/employees", employeeHandler)
+	r.HandleFunc("/employees", createEmployeeHandler).Methods("POST")
 	log.Fatal(http.ListenAndServe(":4000", r))
 }
 
-func employeeHandler(w http.ResponseWriter, r *http.Request) {
-	switch method := r.Method; method {
-	case "GET":
-		users := sq.Select("ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus").From("employees")
-		sql, args, err := users.ToSql()
-		fmt.Println(sql, args, err)
+func createEmployeeHandler(w http.ResponseWriter, r *http.Request) {
+	firstName := r.FormValue("firstName")
+	lastName := r.FormValue("lastName")
+	dateOfBirth := r.FormValue("dateOfBirth")
+	addressLineOne := r.FormValue("addressLineOne")
+	addressLineTwo := r.FormValue("addressLineTwo")
+	city := r.FormValue("city")
+	postcode := r.FormValue("postcode")
+	startDate := r.FormValue("startDate")
+	nextOfKin := r.FormValue("nextOfKin")
+	position := r.FormValue("position")
+	employeeStatus := r.FormValue("employeeStatus")
 
-
-		rows, err := db.Query(sql)
-		if err != nil {
-			fmt.Println("error: ", err)
-			log.Fatal(err)
-		}
-		defer rows.Close()
-
-		employees := make([]*Employee, 0)
-		for rows.Next() {
-			employee := new(Employee)
-			err := rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
-			if err != nil {
-				log.Fatal(err)
-			}
-			employees = append(employees, employee)
-
-		}
-		if err = rows.Err(); err != nil {
-			log.Fatal(err)
-		}
-		for _, employee := range employees {
-			json, err := json.MarshalIndent(employee, "", "")
-			if err != nil {
-				log.Println(err)
-			}
-			fmt.Fprint(w, string(json))
-		}
-
-	case "POST":
-		firstName := r.FormValue("firstName")
-		lastName := r.FormValue("lastName")
-		dateOfBirth := r.FormValue("dateOfBirth")
-		addressLineOne := r.FormValue("addressLineOne")
-		addressLineTwo := r.FormValue("addressLineTwo")
-		city := r.FormValue("city")
-		postcode := r.FormValue("postcode")
-		startDate := r.FormValue("startDate")
-		nextOfKin := r.FormValue("nextOfKin")
-		position := r.FormValue("position")
-		employeeStatus := r.FormValue("employeeStatus")
-
-		if firstName == "" ||lastName == "" ||addressLineOne == "" ||city == ""||postcode == "" ||startDate == "" ||nextOfKin == "" ||position == "" ||employeeStatus == "" {
-			http.Error(w, http.StatusText(400), 400)
-			return
-		}
-		result, err := db.Exec("INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, employeeStatus) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, employeeStatus)
-		if err != nil{
-			fmt.Println(w, err)
-			http.Error(w, http.StatusText(500), 500)
-			return
-		}
-		rowsAffected, err := result.RowsAffected()
-		if err != nil {
-			http.Error(w, http.StatusText(500),500)
-			return
-		}
-
-		fmt.Fprintf(w, "Employee %s created successfully (%d row affected)\n", firstName + " " + lastName, rowsAffected)
-
-	default:
-		fmt.Fprintln(w, "Endpoint hit: This endpoint only supports GET or POST requests")
-
+	if firstName == "" || lastName == "" || addressLineOne == "" || city == "" || postcode == "" || startDate == "" || nextOfKin == "" || position == "" || employeeStatus == "" {
+		http.Error(w, http.StatusText(400), 400)
+		return
 	}
+	result, err := db.Exec("INSERT INTO employees (firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, employeeStatus) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, employeeStatus)
+	if err != nil {
+		fmt.Println(w, err)
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+
+	fmt.Fprintf(w, "Employee %s created successfully (%d row affected)\n", firstName+" "+lastName, rowsAffected)
+
 }
 func getEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	muxvars := mux.Vars(r)
@@ -155,7 +108,7 @@ func getEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(json))
 
 }
-func deleteEmployeeByIDHandler(w http.ResponseWriter, r *http.Request){
+func deleteEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	muxvars := mux.Vars(r)
 	ID := muxvars["id"]
 	result, err := db.Exec("UPDATE employees SET employeeStatus ='Disabled' WHERE ID =$1", ID)
@@ -207,9 +160,9 @@ func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 		b = b.Set("addressLineOne", employeeReq.AddressLineOne)
 	}
 
-	/*if employeeReq.AddressLineTwo != "" {
-		b = b.Set("addressLineTwo", employeeReq.AddressLineOne)
-	}*/
+	if employeeReq.AddressLineTwo.String != "" {
+		b = b.Set("addressLineTwo", employeeReq.AddressLineTwo)
+	}
 
 	if employeeReq.City != "" {
 		b = b.Set("city", employeeReq.City)
@@ -230,15 +183,15 @@ func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 		b = b.Set("position", employeeReq.Position)
 	}
 
-	/*if employeeReq.EndDate == "inactive" {
+	if employeeReq.EndDate.String != "inactive" {
 		b = b.Set("endDate", employeeReq.EndDate)
-	}*/
+	}
 
 	mysql, args, err := b.ToSql()
 	if err != nil {
 		log.Fatal("err toSQL: ", err)
 	}
-	fmt.Println("My final SQL query with args>>>>>", mysql,args)
+	fmt.Println("My final SQL query with args>>>>>", mysql, args)
 
 	_, err = b.Exec()
 	if err != nil {
@@ -247,33 +200,6 @@ func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 
 	return
 
-		//tx, _ := db.Begin()
-		//stmt, _ := tx.Prepare("UPDATE employees SET firstName = ?, lastName = ? WHERE ID = ?")
-		//
-		//result, err := stmt.Exec(firstName, lastName, ID)
-		//if err != nil {
-		//	w.WriteHeader(http.StatusInternalServerError)
-		//	fmt.Fprint(w, err)
-		//	return
-		//}
-		//tx.Commit()
-		//if err == sql.ErrNoRows {
-		//	http.NotFound(w, r)
-		//	fmt.Println("sql no rows error", err)
-		//	return
-		//} else if err != nil {
-		//	w.WriteHeader(http.StatusInternalServerError)
-		//	fmt.Fprint(w, err)
-		//	return
-		//}
-		//rowsAffected, err := result.RowsAffected()
-		//if err != nil {
-		//	log.Fatal(err)
-		//	return
-		//}
-		//fmt.Fprintf(w, "Employee %d updated successfully (%d row affected)\n", ID, rowsAffected)
-
-	//}
 }
 
 func employeeSearchHandler(w http.ResponseWriter, r *http.Request) {

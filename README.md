@@ -43,3 +43,25 @@ Notes:
 * Non-functional requirements should be considered, even if not fully implemented in code.
 * The REST API needs to comply with industry standards
 * No front-end needs to be developed for this project
+
+-----
+
+## Instructions for Use 
+
+This API runs on localhost:4000 and handles creating an employee, updating an employees details, deleting an employee, searching for employee(s) using their personal details and searching for all employees.
+
+Functionality can be accessed and edited using Postman or in the IDE using curl requests.
+
+## Getting Started
+
+Enter go run main.go in the terminal to start the server.
+
+## Creating a User
+
+Using a POST request in Postman enter the address http://localhost:4000/employees and select params.  The keys for an employee record are as follows, values will be the employee's individual personal details:
+
+![Alt text](/create employee.png?raw=true "Create New Employee")
+
+All listed fields are required except addressLineTwo which is optional.
+
+If an employee record has been successfully created you will see a message indicated that this has happened.

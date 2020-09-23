@@ -13,7 +13,7 @@ func TestemployeeHandler(t *testing.T){
 	req := httptest.NewRequest(http.MethodGet, "/employees", nil)
 	res := httptest.NewRecorder()
 
-	employeeHandler(res, req)
+	createEmployeeHandler(res, req)
 
 	result := res.Result()
 
