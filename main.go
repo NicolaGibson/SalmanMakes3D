@@ -36,7 +36,6 @@ type Employee struct {
 	employeeStatus    string         `json:"employeeStatus"`
 }
 
-
 var db *sql.DB
 
 func init(){
@@ -56,7 +55,7 @@ func main() {
 	r.HandleFunc("/employees/{id:[0-9]+}", getEmployeeByIDHandler).Methods("GET")
 	r.HandleFunc("/employees/{id:[0-9]+}", deleteEmployeeByIDHandler).Methods("DELETE")
 	r.HandleFunc ("/employees/{id:[0-9]+}", updateEmployeeByIDHandler).Methods("PATCH")
-	r.HandleFunc("/employees", employeeSearchHandler).Methods("GET")//.Queries("key, {[0-9A-Za-z_]}")
+	r.HandleFunc("/employees", employeeSearchHandler).Methods("GET")
 	//r.HandleFunc("/employees", employeeHandler)
 	log.Fatal(http.ListenAndServe(":4000", r))
 }
@@ -280,25 +279,24 @@ func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 func employeeSearchHandler(w http.ResponseWriter, r *http.Request) {
 	filterValues := r.URL.Query()
 	fmt.Printf("filterValues: %+v\n", filterValues)
-	var employeeReq Employee
-	//fmt.Printf("empReq: %+v******\n", employeeReq)
-	for k, v := range filterValues {
-		if k == "first_name" {
-			employeeReq.FirstName = v[0]
-		}
 
-	}
 	employeesSQL := sq.Select("ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus").From("employees").RunWith(db)
 
-	if employeeReq.FirstName != "" {
-		employeesSQL = employeesSQL.Where("firstName LIKE ?", employeeReq.FirstName)
+	for k, v := range filterValues {
+		switch k {
+		case "first_name":
+			employeesSQL = employeesSQL.Where("firstName = ?", v[0])
+		case "last_name":
+			employeesSQL = employeesSQL.Where("lastName = ?", v[0])
+		case "date_of_birth":
+			employeesSQL = employeesSQL.Where("date_of_birth = ?", v[0])
+		}
 	}
 
 	sql, args, err := employeesSQL.ToSql()
 	fmt.Printf("SQL: %v, Args: %+v, Err: %v\n", sql, args, err)
 
-
-	rows, err := db.Query(sql, args)
+	rows, err := employeesSQL.Query()
 	if err != nil {
 		fmt.Println("db query error: ", err)
 		log.Fatal(err)
@@ -327,126 +325,4 @@ func employeeSearchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprint(w, string(json))
 	}
-
-	//d := employees.Where(sq.Eq{"filterValues": filterValues})
-	//sqlStr, args, err := d.ToSql()
-	//sqlStr = "SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus FROM employees WHERE filterValues = ?, filterValues"
-	//fmt.Println(sqlStr, args, err)
-
-	/*if err != nil {
-			fmt.Println("error: ", err)
-			log.Fatal(err)
-		}
-		sql := &bytes.Buffer{}
-
-		if len(sqlStr) > 0 {
-			args, err = appendToSql(sqlStr.Prefixes, sql, " ", args)
-			if err != nil {
-				return
-			}
-
-			sql.WriteString(" ")
-		}
-		if employeeReq.FirstName != "" {
-			d = d.Select("firstName", employeeReq.FirstName)
-		}
-
-		if employeeReq.LastName != "" {
-			d = d.Set("lastName", employeeReq.LastName)
-		}
-
-		if employeeReq.DateOfBirth != "" {
-			d = d.Set("dateOfBirth", employeeReq.DateOfBirth)
-		}
-
-		if employeeReq.AddressLineOne != "" {
-			d = d.Set("addressLineOne", employeeReq.AddressLineOne)
-		}
-
-		if employeeReq.AddressLineTwo != "" {
-			d = d.Set("addressLineTwo", employeeReq.AddressLineOne)
-		}
-
-		if employeeReq.City != "" {
-			d = d.Set("city", employeeReq.City)
-		}
-
-		if employeeReq.Postcode != "" {
-			d = d.Set("postcode", employeeReq.Postcode)
-		}
-
-		if employeeReq.StartDate != "" {
-			d = d.Set("startDate", employeeReq.StartDate)
-		}
-
-		if employeeReq.NextOfKin != "" {
-			d = d.Set("nextOfKin", employeeReq.NextOfKin)
-		}
-		if employeeReq.Position != "" {
-			d = d.Set("position", employeeReq.Position)
-		}
-
-		if employeeReq.EndDate == "inactive" {
-			d = d.Set("endDate", employeeReq.EndDate)
-		}
-
-		mysql, args, err := d.ToSql()
-		if err != nil {
-			log.Fatal("err toSQL: ", err)
-		}
-		fmt.Println("My final SQL query with args>>>>>", mysql, args)
-
-		_, err = d.Exec()
-		if err != nil {
-			log.Fatal("error executing query: ", err)
-		}
-
-		return
-	} */
-	/*
-		users := sq.Select("ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus").From("employees")
-		sql, args, err := users.ToSql()
-		fmt.Println(sql, args, err)
-
-		rows, err := db.Query("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate FROM employees WHERE firstName LIKE $1", firstName)
-
-		if err != nil {
-				log.Fatal(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, err)
-				return
-			}
-			defer rows.Close()
-
-			employees := make([]*Employee, 0)
-			for rows.Next() {
-				fmt.Println("Employee found")
-				employee := new(Employee)
-				err := rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate)
-				if err != nil {
-					log.Fatal(err)
-					w.WriteHeader(http.StatusInternalServerError)
-					fmt.Fprint(w, err)
-					return
-				}
-				employees = append(employees, employee)
-			}
-			fmt.Printf("%+v\n", employees)
-			if err = rows.Err(); err != nil {
-				log.Fatal(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, err)
-				return
-			}
-			for _, employee := range employees {
-				json, err := json.MarshalIndent(employee, "", "")
-				if err != nil {
-					log.Println(err)
-					w.WriteHeader(http.StatusInternalServerError)
-					fmt.Fprint(w, err)
-					return
-				}
-				fmt.Fprint(w, string(json))
-			} */
-
 }
