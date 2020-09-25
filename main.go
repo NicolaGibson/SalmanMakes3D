@@ -232,6 +232,7 @@ func employeeSearchHandler(w http.ResponseWriter, r *http.Request) {
 		case "endDate":
 			employeesSQL = employeesSQL.Where("startDate = ?", v[0])
 		}
+	}
 
 		sql, args, err := employeesSQL.ToSql()
 		fmt.Printf("SQL: %v, Args: %+v, Err: %v\n", sql, args, err)
@@ -266,4 +267,3 @@ func employeeSearchHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, string(json))
 		}
 	}
-}
