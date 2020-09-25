@@ -85,7 +85,7 @@ func createEmployeeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Employee %s created successfully (%d row affected)\n", firstName+" "+lastName, rowsAffected)
 
 }
-func getEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
+func getEmployeeByIDHandler(w http.ResponseWriter, r *http.Request){
 	muxvars := mux.Vars(r)
 	ID := muxvars["id"]
 	row := db.QueryRow("SELECT ID, firstName, lastName, dateOfBirth, addressLineOne, addressLineTwo, city, postcode, startDate, nextOfKin, position, endDate, recordCreatedDate, employeeStatus FROM employees WHERE ID =$1", ID)
@@ -201,7 +201,6 @@ func updateEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
-
 func employeeSearchHandler(w http.ResponseWriter, r *http.Request) {
 	filterValues := r.URL.Query()
 	fmt.Printf("filterValues: %+v\n", filterValues)
@@ -210,45 +209,61 @@ func employeeSearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	for k, v := range filterValues {
 		switch k {
-		case "first_name":
+		case "firstName":
 			employeesSQL = employeesSQL.Where("firstName = ?", v[0])
-		case "last_name":
+		case "lastName":
 			employeesSQL = employeesSQL.Where("lastName = ?", v[0])
-		case "date_of_birth":
-			employeesSQL = employeesSQL.Where("date_of_birth = ?", v[0])
+		case "dateOfBirth":
+			employeesSQL = employeesSQL.Where("dateofBirth = ?", v[0])
+		case "addressLineOne":
+			employeesSQL = employeesSQL.Where("addressLineOne = ?", v[0])
+		case "addressLineTwo":
+			employeesSQL = employeesSQL.Where("addressLineTwo = ?", v[0])
+		case "city":
+			employeesSQL = employeesSQL.Where("city = ?", v[0])
+		case "postcode":
+			employeesSQL = employeesSQL.Where("postcode = ?", v[0])
+		case "startDate":
+			employeesSQL = employeesSQL.Where("startDate = ?", v[0])
+		case "nextOfKin":
+			employeesSQL = employeesSQL.Where("nextOfKin = ?", v[0])
+		case "position":
+			employeesSQL = employeesSQL.Where("position = ?", v[0])
+		case "endDate":
+			employeesSQL = employeesSQL.Where("startDate = ?", v[0])
 		}
-	}
 
-	sql, args, err := employeesSQL.ToSql()
-	fmt.Printf("SQL: %v, Args: %+v, Err: %v\n", sql, args, err)
+		sql, args, err := employeesSQL.ToSql()
+		fmt.Printf("SQL: %v, Args: %+v, Err: %v\n", sql, args, err)
 
-	rows, err := employeesSQL.Query()
-	if err != nil {
-		fmt.Println("db query error: ", err)
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	employees := make([]*Employee, 0)
-	for rows.Next() {
-		employee := new(Employee)
-		err := rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
+		rows, err := employeesSQL.Query()
 		if err != nil {
-			fmt.Println("db rows.Scan error: ", err)
+			fmt.Println("db query error: ", err)
 			log.Fatal(err)
 		}
-		employees = append(employees, employee)
+		defer rows.Close()
 
-	}
-	if err = rows.Err(); err != nil {
-		log.Fatal(err)
-	}
-	for _, employee := range employees {
-		json, err := json.MarshalIndent(employee, "", "")
-		if err != nil {
-			fmt.Println("JSON marshall error: ", err)
-			log.Println(err)
+		employees := make([]*Employee, 0)
+		for rows.Next() {
+			employee := new(Employee)
+			err := rows.Scan(&employee.ID, &employee.FirstName, &employee.LastName, &employee.DateOfBirth, &employee.AddressLineOne, &employee.AddressLineTwo, &employee.City, &employee.Postcode, &employee.StartDate, &employee.NextOfKin, &employee.Position, &employee.EndDate, &employee.RecordCreatedDate, &employee.employeeStatus)
+			if err != nil {
+				fmt.Println("db rows.Scan error: ", err)
+				log.Fatal(err)
+			}
+			employees = append(employees, employee)
+
 		}
-		fmt.Fprint(w, string(json))
+		if err = rows.Err(); err != nil {
+			log.Fatal(err)
+		}
+		for _, employee := range employees {
+			json, err := json.MarshalIndent(employee, "", "")
+			if err != nil {
+				fmt.Println("JSON marshall error: ", err)
+				log.Println(err)
+			}
+			fmt.Fprint(w, string(json))
+		}
 	}
 }

@@ -85,7 +85,7 @@ first_name
 last_name          
 date_of_birth       
 address_line_one   
-address_line_ywo    
+address_line_two    
 city              
 postcode          
 start_date         
@@ -93,7 +93,25 @@ next_Of_kin
 position          
 end_date           
 	         
-Using a PATCH request in Postman enter http://localhost:4000/employees/28
+In this example we are updating employee 28.  Using a PATCH request in Postman enter http://localhost:4000/employees/28.  Make sure that the Body menu is selected and the input type raw, then enter the name of the column to be edited and the value. Input type for this endpoint is a JSON object and must be formatted correctly.
+
+In this example we are updating the following employee details: 
+
+first_name         
+last_name          
+date_of_birth       
+address_line_one   
+address_line_ywo    
+city              
+postcode                
+next_Of_kin         
+ 
+
+![Alt text](/update_employee.png "Update Employee")
+
+Once all details have been entered successful, click Send to submit your request.  A successful update will return a 200 status code.
+
+![Alt text](/update_employee_success.png "Update Employee Successful")
 
 ## Search for an Employee by ID
 
@@ -102,3 +120,5 @@ This search requires an employee's ID, please make sure that you know it before 
 Using a GET request in Postman enter http://localhost:4000/employees/28, then press the Send button.
 
 ## Search for an Employee(s)
+
+This search is used for returning employee(s)
