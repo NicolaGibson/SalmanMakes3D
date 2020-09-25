@@ -58,7 +58,7 @@ Enter go run main.go in the terminal to start the server.
 
 ## Creating an Employee
 
-Using a POST request in Postman enter http://localhost:4000/employees and select params.  The keys for an employee record are as follows, values will be the employee's individual personal details:
+Using a **POST** request in Postman enter http://localhost:4000/employees and select params.  The keys for an employee record are as follows, values will be the employee's individual personal details:
 
 ![alt text](https://raw.githubusercontent.com/NicolaGibson/SalmanMakes3D/master/create%20employee.png "Create New Employee")
 
@@ -82,18 +82,18 @@ next_Of_kin
 position          
 end_date           
 	         
-In this example we are updating employee 28.  Using a PATCH request in Postman enter http://localhost:4000/employees/28.  Make sure that the Body menu is selected and the input type raw, then enter the name of the value to be edited and the value. Input type for this endpoint is a JSON object and must be formatted correctly.
+In this example we are updating employee 28.  Using a **PATCH** request in Postman enter http://localhost:4000/employees/28.  Make sure that the Body menu is selected and the input type raw, then enter the name of the value to be edited and the value. Input type for this endpoint is a JSON object and must be formatted correctly.
 
 In this example we are updating the following employee details: 
 
-first_name         
-last_name          
-date_of_birth       
-address_line_one   
-address_line_ywo    
-city              
-postcode                
-next_Of_kin         
+*first_name         
+*last_name          
+*date_of_birth       
+*address_line_one   
+*address_line_ywo    
+*city              
+*postcode                
+*next_Of_kin         
  
 
 ![alt text](update_employee.png "Update Employee")
@@ -108,7 +108,7 @@ Employees are deleted by their ID number, please make sure you know the ID numbe
 
 ![alt text](delete_employee.png "Delete Employee")
 
-Using a DELETE request in Postman enter http://localhost:4000/employees/28, then press the Send button.
+Using a **DELETE** request in Postman enter http://localhost:4000/employees/28, then press the Send button.
 
 If an employee has been successfully deleted you will see the following message: "Employee 28 deleted successfully (1 row affected)".
 
@@ -116,13 +116,13 @@ If an employee has been successfully deleted you will see the following message:
 
 This search requires an employee's ID, please make sure that you know it before starting the search.  In the example below we will be using employee ID 28.
 
-Using a GET request in Postman enter http://localhost:4000/employees/28, then press the Send button.
+Using a **GET** request in Postman enter http://localhost:4000/employees/28, then press the Send button.
 
 The employee with the corresponding ID will be returned.
 
 ## Search for an Employee(s)
 
-This search is used for returning an employee or employees that much search criterion.  Searchable values include:
+This search is used for returning an employee or employees that match search criterion.  You can use the following search parameters:
 
 firstName
 lastName
@@ -135,8 +135,12 @@ startDate
 nextOfKin
 position
 
-Using a GET request in Postman enter http://localhost:4000/employees?searchValue, with search Value being the criteria you wish to search using, then press the Send button. In the example below we search using the criteria "designer":
+Using a **GET** request in Postman enter http://localhost:4000/employees?searchValue=result, with searchValue being the criteria you wish to search for and result being the result you would like returned, then press the Send button. In the example below we search using the searchValue - "position" - and the expected result - "Designer"-
 
 ![alt text](search_for_employee.png "Update Employee")
 
 The employee(s) that match your search criteria will be returned.
+
+If you would like to filter the results down further or try a more complicated search this can be done using the **&** to connect search Values e.g.
+http://localhost:4000/employees?position=Designer&firstName=Adele
+
