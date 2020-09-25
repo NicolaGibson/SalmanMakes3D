@@ -60,7 +60,7 @@ Enter go run main.go in the terminal to start the server.
 
 Using a POST request in Postman enter http://localhost:4000/employees and select params.  The keys for an employee record are as follows, values will be the employee's individual personal details:
 
-![alt text](create_employee.png "Create New Employee")
+![alt text](https://raw.githubusercontent.com/NicolaGibson/SalmanMakes3D/master/create%20employee.png "Create New Employee")
 
 Once all key and values have been entered press the Send button.
 
