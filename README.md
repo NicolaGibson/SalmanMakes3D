@@ -60,22 +60,11 @@ Enter go run main.go in the terminal to start the server.
 
 Using a POST request in Postman enter http://localhost:4000/employees and select params.  The keys for an employee record are as follows, values will be the employee's individual personal details:
 
-![Alt text](/create_employee.png "Create New Employee")
+![alt text](create_employee.png "Create New Employee")
 
-All listed fields are required except addressLineTwo which is optional. Once all key and values have been entered press the Send button.
+Once all key and values have been entered press the Send button.
 
 If an employee record has been successfully created you will see a message indicated that this has happened.
-
-## Deleting an Employee 
-
-Employees are deleted by their ID number, please make sure you know the ID number before deleting an employee.  In the example below we will delete employee 28.
-
-![Alt text](/delete_employee.png "Delete Employee")
-
-Using a DELETE request in Postman enter http://localhost:4000/employees/28, then press the Send button.
-
-If an employee has been successfully deleted you will see the following message: "Employee 28 deleted successfully (1 row affected)".
-
 
 ## Update an Employee's Details
 
@@ -107,11 +96,21 @@ postcode
 next_Of_kin         
  
 
-![Alt text](/update_employee.png "Update Employee")
+![alt text](update_employee.png "Update Employee")
 
 Once all details have been entered successful, click Send to submit your request.  A successful update will return a 200 status code.
 
-![Alt text](/update_employee_success.png "Update Employee Successful")
+![alt text](update_employee_success.png "Update Employee Successful")
+
+## Deleting an Employee 
+
+Employees are deleted by their ID number, please make sure you know the ID number before deleting an employee.  In the example below we will delete employee 28.
+
+![alt text](delete_employee.png "Delete Employee")
+
+Using a DELETE request in Postman enter http://localhost:4000/employees/28, then press the Send button.
+
+If an employee has been successfully deleted you will see the following message: "Employee 28 deleted successfully (1 row affected)".
 
 ## Search for an Employee by ID
 
@@ -136,8 +135,8 @@ startDate
 nextOfKin
 position
 
-Using a GET request in Postman enter http://localhost:4000/employees?searchValue, with searchValue being the criteria you wish to search using, then press the Send button. In the example below we serch for Designers:
+Using a GET request in Postman enter http://localhost:4000/employees?searchValue, with search Value being the criteria you wish to search using, then press the Send button. In the example below we search using the criteria "designer":
 
-![Alt text](/search_for_employee.png "Update Employee")
+![alt text](search_for_employee.png "Update Employee")
 
 The employee(s) that match your search criteria will be returned.
