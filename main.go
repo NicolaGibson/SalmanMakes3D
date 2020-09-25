@@ -229,11 +229,8 @@ func employeeSearchHandler(w http.ResponseWriter, r *http.Request) {
 			employeesSQL = employeesSQL.Where("nextOfKin = ?", v[0])
 		case "position":
 			employeesSQL = employeesSQL.Where("position = ?", v[0])
-		case "endDate":
-			employeesSQL = employeesSQL.Where("startDate = ?", v[0])
 		}
 	}
-
 		sql, args, err := employeesSQL.ToSql()
 		fmt.Printf("SQL: %v, Args: %+v, Err: %v\n", sql, args, err)
 

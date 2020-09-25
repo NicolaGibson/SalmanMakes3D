@@ -93,7 +93,7 @@ next_Of_kin
 position          
 end_date           
 	         
-In this example we are updating employee 28.  Using a PATCH request in Postman enter http://localhost:4000/employees/28.  Make sure that the Body menu is selected and the input type raw, then enter the name of the column to be edited and the value. Input type for this endpoint is a JSON object and must be formatted correctly.
+In this example we are updating employee 28.  Using a PATCH request in Postman enter http://localhost:4000/employees/28.  Make sure that the Body menu is selected and the input type raw, then enter the name of the value to be edited and the value. Input type for this endpoint is a JSON object and must be formatted correctly.
 
 In this example we are updating the following employee details: 
 
@@ -119,6 +119,25 @@ This search requires an employee's ID, please make sure that you know it before 
 
 Using a GET request in Postman enter http://localhost:4000/employees/28, then press the Send button.
 
+The employee with the corresponding ID will be returned.
+
 ## Search for an Employee(s)
 
-This search is used for returning employee(s)
+This search is used for returning an employee or employees that much search criterion.  Searchable values include:
+
+firstName
+lastName
+dateOfBirth
+addressLineOne
+addressLineTwo
+city
+postCode
+startDate
+nextOfKin
+position
+
+Using a GET request in Postman enter http://localhost:4000/employees?searchValue, with searchValue being the criteria you wish to search using, then press the Send button. In the example below we serch for Designers:
+
+![Alt text](/search_for_employee.png "Update Employee")
+
+The employee(s) that match your search criteria will be returned.
